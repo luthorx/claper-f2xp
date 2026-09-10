@@ -7,14 +7,14 @@
     {csrf_meta_tag()}
     <.live_title suffix=" · F2XP" )>{assigns[:page_title] || "F2XP"}</.live_title>
     <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link phx-track-static rel="stylesheet" href="/assets/app.css" />
-    <link phx-track-static rel="stylesheet" href="/assets/custom.css" />
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <link phx-track-static rel="stylesheet" href={~p"/assets/custom.css"} />
     <script>
       window.claperConfig = {
         supportedLocales: <%= raw(Jason.encode!(Application.get_env(:claper, :languages, ["en", "fr", "es", "it", "de"]))) %>
       };
     </script>
-    <script defer phx-track-static type="text/javascript" src="/assets/app.js">
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
   <body class="">
