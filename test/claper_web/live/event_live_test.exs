@@ -35,6 +35,36 @@ defmodule ClaperWeb.EventLiveTest do
       assert html_response(conn, 200) =~ "some updated name"
     end
 
+    test "edits a finished event", %{conn: conn, presentation_file: presentation_file} do
+      {:ok, _event} = Claper.Events.terminate_event(presentation_file.event)
+
+      {:ok, index_live, _html} = live(conn, ~p"/events/#{presentation_file.event.uuid}/edit")
+      assert has_element?(index_live, "#event-editor-title", "Edit event")
+
+      {:ok, conn} =
+        index_live
+        |> form("#event-form", event: @update_attrs)
+        |> render_submit()
+        |> follow_redirect(conn, ~p"/events")
+
+      assert html_response(conn, 200) =~ "Updated successfully"
+    end
+
+    test "creates an event without a start date", %{conn: conn} do
+      {:ok, new_live, _html} = live(conn, ~p"/events/new")
+
+      refute has_element?(new_live, ~s(#date-picker input[type="datetime-local"][required]))
+
+      {:ok, _conn} =
+        new_live
+        |> form("#event-form", event: %{name: "No start date", code: "nostart1"})
+        |> render_submit()
+        |> follow_redirect(conn, ~p"/events")
+
+      event = Claper.Events.get_event_with_code("nostart1")
+      assert NaiveDateTime.diff(NaiveDateTime.utc_now(), event.started_at) |> abs() < 60
+    end
+
     test "renders the redesigned create and edit states", %{
       conn: conn,
       presentation_file: presentation_file
@@ -189,6 +219,7 @@ defmodule ClaperWeb.EventLiveTest do
       assert html =~ "Be the first to ask a question or share a thought."
       assert html =~ presentation_file.event.name
     end
+
   end
 
   describe "Manage" do

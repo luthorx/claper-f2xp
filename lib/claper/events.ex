@@ -490,6 +490,122 @@ defmodule Claper.Events do
   end
 
   @doc """
+  Reactivates a terminated event, so it can be edited, managed and joined again
+  with the same code.
+
+  With `reset: true` the audience interactions of the previous session are
+  deleted (posts and their reactions, poll votes, quiz responses and form
+  submissions), their counters and the audience peak are reset. Prepared
+  content (slides, polls, quizzes, forms, embeds) is always kept.
+
+  Returns `{:error, :code_taken}` when another active event uses the same code.
+
+  ## Examples
+
+      iex> reactivate_event(event)
+      {:ok, %Event{}}
+
+      iex> reactivate_event(event, reset: true)
+      {:ok, %Event{}}
+
+  """
+  def reactivate_event(%Event{} = event, opts \\ []) do
+    reset? = Keyword.get(opts, :reset, false)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:code_available, fn _repo, _changes ->
+      if active_event_with_code?(event.code, event.id),
+        do: {:error, :code_taken},
+        else: {:ok, true}
+    end)
+    |> Ecto.Multi.run(:reset, fn _repo, _changes ->
+      if reset?, do: {:ok, reset_interactions(event)}, else: {:ok, nil}
+    end)
+    |> Ecto.Multi.update(:event, Event.reactivate_changeset(event, reset: reset?))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{event: event}} ->
+        broadcast_all_users({:updated, event})
+        {:ok, event}
+
+      {:error, :code_available, :code_taken, _changes} ->
+        {:error, :code_taken}
+
+      {:error, _operation, reason, _changes} ->
+        {:error, reason}
+    end
+  end
+
+  defp active_event_with_code?(code, event_id) do
+    now = NaiveDateTime.utc_now()
+
+    from(e in Event,
+      where:
+        e.code == ^code and e.id != ^event_id and (is_nil(e.expired_at) or e.expired_at > ^now)
+    )
+    |> Repo.exists?()
+  end
+
+  defp reset_interactions(%Event{id: event_id}) do
+    presentation_file_ids =
+      from(pf in Presentations.PresentationFile, where: pf.event_id == ^event_id, select: pf.id)
+
+    poll_ids =
+      from(p in Claper.Polls.Poll,
+        where: p.presentation_file_id in subquery(presentation_file_ids),
+        select: p.id
+      )
+
+    quiz_ids =
+      from(q in Claper.Quizzes.Quiz,
+        where: q.presentation_file_id in subquery(presentation_file_ids),
+        select: q.id
+      )
+
+    quiz_question_ids =
+      from(qq in Claper.Quizzes.QuizQuestion,
+        where: qq.quiz_id in subquery(quiz_ids),
+        select: qq.id
+      )
+
+    form_ids =
+      from(f in Claper.Forms.Form,
+        where: f.presentation_file_id in subquery(presentation_file_ids),
+        select: f.id
+      )
+
+    # Reactions are removed with their posts (on_delete: :delete_all)
+    {posts, _} = from(p in Claper.Posts.Post, where: p.event_id == ^event_id) |> Repo.delete_all()
+
+    {poll_votes, _} =
+      from(v in Claper.Polls.PollVote, where: v.poll_id in subquery(poll_ids))
+      |> Repo.delete_all()
+
+    from(o in Claper.Polls.PollOpt, where: o.poll_id in subquery(poll_ids))
+    |> Repo.update_all(set: [vote_count: 0])
+
+    {quiz_responses, _} =
+      from(r in Claper.Quizzes.QuizResponse, where: r.quiz_id in subquery(quiz_ids))
+      |> Repo.delete_all()
+
+    from(o in Claper.Quizzes.QuizQuestionOpt,
+      where: o.quiz_question_id in subquery(quiz_question_ids)
+    )
+    |> Repo.update_all(set: [response_count: 0])
+
+    {form_submits, _} =
+      from(s in Claper.Forms.FormSubmit, where: s.form_id in subquery(form_ids))
+      |> Repo.delete_all()
+
+    %{
+      posts: posts,
+      poll_votes: poll_votes,
+      quiz_responses: quiz_responses,
+      form_submits: form_submits
+    }
+  end
+
+  @doc """
   Import interactions from another event
 
   ## Examples

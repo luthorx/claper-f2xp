@@ -230,7 +230,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
           <.link
             :if={Event.started?(@event) && not @is_leader}
             data-confirm={
-              gettext("Are you sure you want to terminate this event? This action cannot be undone.")
+              gettext("Are you sure you want to terminate this event? You can reactivate it later.")
             }
             phx-value-id={@event.uuid}
             phx-click="terminate"
@@ -447,7 +447,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
                 :if={Event.started?(@event) && not @is_leader}
                 data-confirm={
                   gettext(
-                    "Are you sure you want to terminate this event? This action cannot be undone."
+                    "Are you sure you want to terminate this event? You can reactivate it later."
                   )
                 }
                 phx-value-id={@event.uuid}
@@ -700,7 +700,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
                 :if={Event.started?(@event) && not @is_leader}
                 data-confirm={
                   gettext(
-                    "Are you sure you want to terminate this event? This action cannot be undone."
+                    "Are you sure you want to terminate this event? You can reactivate it later."
                   )
                 }
                 phx-value-id={@event.uuid}
@@ -793,6 +793,71 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
       <% end %>
 
       <%= if Event.finished?(@event) && not @is_leader do %>
+        <li>
+          <.link
+            patch={~p"/events/#{@event.uuid}/edit"}
+            class="flex items-center gap-3 w-full px-3 py-2 hover:bg-gray-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="w-5 h-5"
+            >
+              <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
+              <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
+            </svg>
+            {gettext("Edit")}
+          </.link>
+        </li>
+        <li>
+          <button
+            phx-value-id={@event.uuid}
+            phx-click="reactivate"
+            class="flex items-center gap-3 w-full px-3 py-2 hover:bg-gray-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            {gettext("Reactivate")}
+          </button>
+        </li>
+        <li>
+          <.link
+            phx-click="reactivate"
+            phx-value-id={@event.uuid}
+            phx-value-reset="true"
+            data-confirm={
+              gettext(
+                "Questions, votes, quiz answers and form responses from the previous session will be deleted. Continue?"
+              )
+            }
+            class="flex items-center gap-3 w-full px-3 py-2 hover:bg-gray-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            {gettext("Reactivate from scratch")}
+          </.link>
+        </li>
         <li>
           <button
             phx-value-id={@event.uuid}

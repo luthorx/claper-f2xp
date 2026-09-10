@@ -72,7 +72,7 @@ defmodule Claper.Events.Event do
     ])
     |> cast_assoc(:presentation_file)
     |> cast_assoc(:leaders)
-    |> validate_required([:name, :code, :started_at])
+    |> validate_required([:name, :code])
   end
 
   def create_changeset(event, attrs) do
@@ -81,6 +81,7 @@ defmodule Claper.Events.Event do
     |> cast_assoc(:presentation_file)
     |> cast_assoc(:leaders)
     |> downcase_code
+    |> put_default_started_at()
     |> validate_required([:name, :code, :started_at, :user_id])
     |> validate_length(:code, min: 5, max: 10)
     |> validate_length(:name, min: 5, max: 50)
@@ -110,9 +111,25 @@ defmodule Claper.Events.Event do
     |> cast_assoc(:presentation_file)
     |> cast_assoc(:leaders)
     |> downcase_code
+    |> put_default_started_at()
     |> validate_required([:name, :code, :started_at, :user_id])
     |> validate_length(:code, min: 5, max: 10)
     |> validate_length(:name, min: 5, max: 50)
+  end
+
+  # The start date is optional: without one the event starts right away.
+  defp put_default_started_at(changeset) do
+    case get_field(changeset, :started_at) do
+      nil ->
+        put_change(
+          changeset,
+          :started_at,
+          NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+        )
+
+      _started_at ->
+        changeset
+    end
   end
 
   def restart_changeset(event) do
@@ -120,6 +137,14 @@ defmodule Claper.Events.Event do
       NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second) |> NaiveDateTime.add(48 * 3600)
 
     change(event, expired_at: expiry)
+  end
+
+  def reactivate_changeset(event, opts \\ []) do
+    changeset = change(event, expired_at: nil)
+
+    if Keyword.get(opts, :reset, false),
+      do: put_change(changeset, :audience_peak, 0),
+      else: changeset
   end
 
   def subscribe(event_uuid) do

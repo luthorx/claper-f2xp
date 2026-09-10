@@ -825,8 +825,8 @@ msgstr "Minden a fiókhoz tartozó esemény és fájl törlődni fog. Folytatja?
 #: lib/claper_web/live/event_live/event_card_component.ex:449
 #: lib/claper_web/live/event_live/event_card_component.ex:702
 #, elixir-autogen, elixir-format
-msgid "Are you sure you want to terminate this event? This action cannot be undone."
-msgstr "Biztosan lezárja az eseményt? A művelet nem vonható vissza."
+msgid "Are you sure you want to terminate this event? You can reactivate it later."
+msgstr "Biztosan lezárja az eseményt? Később újraaktiválhatja."
 
 #: lib/claper_web/live/user_settings_live/show.html.heex:449
 #, elixir-autogen, elixir-format
@@ -3592,3 +3592,27 @@ msgstr "A prezentáció csatolva van és használatra kész."
 #, elixir-autogen, elixir-format
 msgid "name@example.com"
 msgstr "name@example.com"
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate"
+msgstr "Újraaktiválás"
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate from scratch"
+msgstr "Újraaktiválás nulláról"
+
+#, elixir-autogen, elixir-format
+msgid "Questions, votes, quiz answers and form responses from the previous session will be deleted. Continue?"
+msgstr "Az előző munkamenet kérdései, szavazatai, kvízválaszai és kitöltött űrlapjai törlődnek. Folytatja?"
+
+#, elixir-autogen, elixir-format
+msgid "Event reactivated"
+msgstr "Esemény újraaktiválva"
+
+#, elixir-autogen, elixir-format
+msgid "This code is already used by another active event: change it, then reactivate the event."
+msgstr "Ezt a kódot már egy másik aktív esemény használja: módosítsa, majd aktiválja újra az eseményt."
+
+#, elixir-autogen, elixir-format
+msgid "Leave empty to make the event available right away."
+msgstr "Hagyja üresen, hogy az esemény azonnal elérhető legyen."

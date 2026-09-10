@@ -54,6 +54,33 @@ defmodule ClaperWeb.EventCardComponentTest do
       assert html =~ "Finished"
     end
 
+    test "offers edit and reactivation for finished events", %{conn: conn, user: user} do
+      presentation_file =
+        create_event(
+          user,
+          NaiveDateTime.add(NaiveDateTime.utc_now(), -7200, :second),
+          NaiveDateTime.add(NaiveDateTime.utc_now(), -10, :second)
+        )
+
+      event = presentation_file.event
+
+      {:ok, view, _html} = live(conn, "/events")
+
+      html =
+        view
+        |> element(".lg\\:flex [phx-click='change-tab'][phx-value-tab='expired']")
+        |> render_click()
+
+      assert html =~ ~s(href="/events/#{event.uuid}/edit")
+      assert html =~ "Reactivate from scratch"
+      assert html =~ ~s(phx-value-reset="true")
+
+      assert {:error, {:redirect, %{to: "/events"}}} =
+               render_click(view, "reactivate", %{"id" => event.uuid})
+
+      assert Claper.Events.get_event!(event.uuid).expired_at == nil
+    end
+
     test "renders finished for expired event before starting", %{conn: conn, user: user} do
       create_event(
         user,

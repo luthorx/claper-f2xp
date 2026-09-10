@@ -829,8 +829,8 @@ msgstr "Visi jūsu notikumi un faili tiks neatgriezeniski dzēsti. Vai esat pār
 #: lib/claper_web/live/event_live/event_card_component.ex:449
 #: lib/claper_web/live/event_live/event_card_component.ex:702
 #, elixir-autogen, elixir-format
-msgid "Are you sure you want to terminate this event? This action cannot be undone."
-msgstr "Vai esat pārliecināti, ka vēlaties pārtraukt šo notikumu? Šo darbību nevar atcelt."
+msgid "Are you sure you want to terminate this event? You can reactivate it later."
+msgstr "Vai esat pārliecināti, ka vēlaties pārtraukt šo notikumu? Vēlāk to varēsiet atkārtoti aktivizēt."
 
 #: lib/claper_web/live/user_settings_live/show.html.heex:449
 #, elixir-autogen, elixir-format
@@ -3596,3 +3596,27 @@ msgstr "Jūsu prezentācija ir pievienota un gatava lietošanai."
 #, elixir-autogen, elixir-format
 msgid "name@example.com"
 msgstr "name@example.com"
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate"
+msgstr "Aktivizēt atkārtoti"
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate from scratch"
+msgstr "Aktivizēt atkārtoti no nulles"
+
+#, elixir-autogen, elixir-format
+msgid "Questions, votes, quiz answers and form responses from the previous session will be deleted. Continue?"
+msgstr "Iepriekšējās sesijas jautājumi, balsojumi, viktorīnu atbildes un aizpildītās veidlapas tiks dzēstas. Turpināt?"
+
+#, elixir-autogen, elixir-format
+msgid "Event reactivated"
+msgstr "Notikums atkārtoti aktivizēts"
+
+#, elixir-autogen, elixir-format
+msgid "This code is already used by another active event: change it, then reactivate the event."
+msgstr "Šo kodu jau izmanto cits aktīvs notikums: nomainiet to un pēc tam atkārtoti aktivizējiet notikumu."
+
+#, elixir-autogen, elixir-format
+msgid "Leave empty to make the event available right away."
+msgstr "Atstājiet tukšu, lai notikums būtu pieejams uzreiz."

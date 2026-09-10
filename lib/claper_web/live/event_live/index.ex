@@ -97,6 +97,34 @@ defmodule ClaperWeb.EventLive.Index do
   end
 
   @impl true
+  def handle_event(
+        "reactivate",
+        %{"id" => id} = params,
+        %{assigns: %{current_user: current_user}} = socket
+      ) do
+    event = Events.get_user_event!(current_user.id, id)
+
+    case Events.reactivate_event(event, reset: params["reset"] == "true") do
+      {:ok, _event} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Event reactivated"))
+         |> redirect(to: ~p"/events")}
+
+      {:error, :code_taken} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :error,
+           gettext(
+             "This code is already used by another active event: change it, then reactivate the event."
+           )
+         )
+         |> push_patch(to: ~p"/events/#{event.uuid}/edit")}
+    end
+  end
+
+  @impl true
   def handle_event("duplicate", %{"id" => id}, %{assigns: %{current_user: current_user}} = socket) do
     event = Events.get_user_event!(current_user.id, id)
     {:ok, _} = Events.duplicate_event(current_user.id, event.uuid)
@@ -153,21 +181,16 @@ defmodule ClaperWeb.EventLive.Index do
     event =
       Events.get_user_event!(socket.assigns.current_user.id, id, [:presentation_file, :leaders])
 
-    if event.expired_at && NaiveDateTime.compare(NaiveDateTime.utc_now(), event.expired_at) == :gt do
-      redirect(socket, to: ~p"/events")
-    else
-      if event.presentation_file.status == "fail" && event.presentation_file.hash do
-        Claper.Presentations.update_presentation_file(event.presentation_file, %{
-          "status" => "done"
-        })
-      end
-
-      {:ok, socket |> assign(:event, event)}
-
-      socket
-      |> assign(:page_title, gettext("Edit event"))
-      |> assign(:event, event)
+    # Finished events stay editable, so they can be reused and reactivated
+    if event.presentation_file.status == "fail" && event.presentation_file.hash do
+      Claper.Presentations.update_presentation_file(event.presentation_file, %{
+        "status" => "done"
+      })
     end
+
+    socket
+    |> assign(:page_title, gettext("Edit event"))
+    |> assign(:event, event)
   rescue
     Ecto.NoResultsError ->
       socket
@@ -178,10 +201,10 @@ defmodule ClaperWeb.EventLive.Index do
   defp apply_action(socket, :new, _params) do
     code = for _ <- 1..5, into: "", do: <<Enum.random(~c"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")>>
 
+    # No start date by default: an event without one starts as soon as it is created
     socket
     |> assign(:page_title, gettext("Create event"))
     |> assign(:event, %Event{
-      started_at: NaiveDateTime.utc_now(),
       code: code,
       leaders: []
     })

@@ -825,8 +825,8 @@ msgstr "Al jouw evenementen en bestanden worden definitief verwijderd. Weet je d
 #: lib/claper_web/live/event_live/event_card_component.ex:449
 #: lib/claper_web/live/event_live/event_card_component.ex:702
 #, elixir-autogen, elixir-format
-msgid "Are you sure you want to terminate this event? This action cannot be undone."
-msgstr "Weet je zeker dat je dit evenement wil stoppen? Deze actie kan niet ongedaan gemaakt worden."
+msgid "Are you sure you want to terminate this event? You can reactivate it later."
+msgstr "Weet je zeker dat je dit evenement wil stoppen? Je kunt het later opnieuw activeren."
 
 #: lib/claper_web/live/user_settings_live/show.html.heex:449
 #, elixir-autogen, elixir-format
@@ -3594,3 +3594,27 @@ msgstr "Je presentatie is bijgevoegd en klaar voor gebruik."
 #, elixir-autogen, elixir-format
 msgid "name@example.com"
 msgstr "name@example.com"
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate"
+msgstr "Heractiveren"
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate from scratch"
+msgstr "Heractiveren vanaf nul"
+
+#, elixir-autogen, elixir-format
+msgid "Questions, votes, quiz answers and form responses from the previous session will be deleted. Continue?"
+msgstr "Vragen, stemmen, quizantwoorden en ingevulde formulieren van de vorige sessie worden verwijderd. Doorgaan?"
+
+#, elixir-autogen, elixir-format
+msgid "Event reactivated"
+msgstr "Evenement geheractiveerd"
+
+#, elixir-autogen, elixir-format
+msgid "This code is already used by another active event: change it, then reactivate the event."
+msgstr "Deze code wordt al gebruikt door een ander actief evenement: wijzig de code en heractiveer daarna het evenement."
+
+#, elixir-autogen, elixir-format
+msgid "Leave empty to make the event available right away."
+msgstr "Laat leeg om het evenement meteen beschikbaar te maken."

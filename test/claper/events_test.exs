@@ -10,7 +10,9 @@ defmodule Claper.EventsTest do
     PresentationsFixtures,
     PollsFixtures,
     FormsFixtures,
-    EmbedsFixtures
+    EmbedsFixtures,
+    PostsFixtures,
+    QuizzesFixtures
   }
 
   setup_all do
@@ -322,10 +324,18 @@ defmodule Claper.EventsTest do
       assert {:error, %Ecto.Changeset{}} = Events.create_event(Map.delete(attrs, :name))
       assert {:error, %Ecto.Changeset{}} = Events.create_event(Map.delete(attrs, :code))
       assert {:error, %Ecto.Changeset{}} = Events.create_event(Map.delete(attrs, :user_id))
-      assert {:error, %Ecto.Changeset{}} = Events.create_event(Map.delete(attrs, :started_at))
 
       assert {:error, %Ecto.Changeset{}} =
                Events.create_event(Map.merge(attrs, %{code: too_short_code}))
+    end
+
+    test "create_event/1 without started_at starts the event immediately" do
+      user = user_fixture()
+
+      assert {:ok, %Event{} = event} =
+               Events.create_event(%{name: "some name", code: "nostart", user_id: user.id})
+
+      assert NaiveDateTime.diff(NaiveDateTime.utc_now(), event.started_at) |> abs() < 5
     end
 
     test "duplicate_event/2 duplicates an event without presentation association" do
@@ -457,9 +467,16 @@ defmodule Claper.EventsTest do
       assert {:error, %Ecto.Changeset{}} = Events.update_event(event, %{code: nil})
       assert {:error, %Ecto.Changeset{}} = Events.update_event(event, %{code: "tiny"})
       assert {:error, %Ecto.Changeset{}} = Events.update_event(event, %{user_id: nil})
-      assert {:error, %Ecto.Changeset{}} = Events.update_event(event, %{started_at: nil})
 
       assert event == Events.get_event!(event.uuid)
+    end
+
+    test "update_event/2 without started_at starts the event now" do
+      event =
+        event_fixture(%{started_at: NaiveDateTime.add(NaiveDateTime.utc_now(), 3600, :second)})
+
+      assert {:ok, %Event{} = event} = Events.update_event(event, %{started_at: nil})
+      assert NaiveDateTime.diff(NaiveDateTime.utc_now(), event.started_at) |> abs() < 5
     end
 
     test "update_event/2 with code that normalizes to nil returns error changeset" do
@@ -487,6 +504,85 @@ defmodule Claper.EventsTest do
       assert NaiveDateTime.diff(NaiveDateTime.utc_now(), event.expired_at) |> abs() < 1
       assert_received {:event_terminated, uuid}
       assert uuid == event.uuid
+    end
+
+    test "reactivate_event/2 reactivates a terminated event keeping its interactions" do
+      event = event_fixture()
+      post_fixture(%{event: event})
+      {:ok, event} = Events.terminate_event(event)
+
+      assert {:ok, %Event{} = event} = Events.reactivate_event(event)
+
+      assert event.expired_at == nil
+      assert Events.get_event_with_code(event.code).id == event.id
+      assert length(Claper.Repo.all(Ecto.assoc(event, :posts))) == 1
+    end
+
+    test "reactivate_event/2 with reset: true clears the previous session's audience interactions" do
+      event = event_fixture()
+      {:ok, event} = Events.update_event(event, %{audience_peak: 12})
+      presentation_file = presentation_file_fixture(%{event: event})
+      user = user_fixture()
+
+      post_fixture(%{event: event, user: user})
+
+      poll = poll_fixture(%{presentation_file_id: presentation_file.id})
+      [poll_opt | _] = poll.poll_opts
+      Claper.Repo.update!(Ecto.Changeset.change(poll_opt, vote_count: 3))
+
+      {:ok, _vote} =
+        Claper.Polls.create_poll_vote(%{
+          poll_id: poll.id,
+          poll_opt_id: poll_opt.id,
+          user_id: user.id
+        })
+
+      quiz = quiz_fixture(%{presentation_file: presentation_file})
+      [question | _] = quiz.quiz_questions
+      [answer | _] = question.quiz_question_opts
+      Claper.Repo.update!(Ecto.Changeset.change(answer, response_count: 2))
+
+      Claper.Repo.insert!(%Claper.Quizzes.QuizResponse{
+        quiz_id: quiz.id,
+        quiz_question_id: question.id,
+        quiz_question_opt_id: answer.id,
+        user_id: user.id
+      })
+
+      form = form_fixture(%{presentation_file_id: presentation_file.id})
+
+      {:ok, _submit} =
+        Claper.Forms.create_form_submit(%{
+          form_id: form.id,
+          user_id: user.id,
+          response: %{"Name" => "Ada"}
+        })
+
+      {:ok, event} = Events.terminate_event(event)
+      assert {:ok, %Event{} = event} = Events.reactivate_event(event, reset: true)
+
+      assert event.expired_at == nil
+      assert event.audience_peak == 0
+      assert Claper.Repo.all(Ecto.assoc(event, :posts)) == []
+      assert Claper.Repo.all(Ecto.assoc(poll, :poll_votes)) == []
+      assert Claper.Repo.get!(Claper.Polls.PollOpt, poll_opt.id).vote_count == 0
+      assert Claper.Repo.all(Ecto.assoc(quiz, :quiz_responses)) == []
+      assert Claper.Repo.get!(Claper.Quizzes.QuizQuestionOpt, answer.id).response_count == 0
+      assert Claper.Repo.all(Ecto.assoc(form, :form_submits)) == []
+
+      # Prepared content is kept
+      assert Claper.Repo.get(Claper.Polls.Poll, poll.id)
+      assert Claper.Repo.get(Claper.Quizzes.Quiz, quiz.id)
+      assert Claper.Repo.get(Claper.Forms.Form, form.id)
+    end
+
+    test "reactivate_event/2 refuses when another active event uses the same code" do
+      event = event_fixture(%{code: "sameco"})
+      {:ok, event} = Events.terminate_event(event)
+      event_fixture(%{code: "sameco"})
+
+      assert {:error, :code_taken} = Events.reactivate_event(event)
+      assert Events.get_event!(event.uuid).expired_at
     end
 
     test "delete_event/1 deletes the event" do

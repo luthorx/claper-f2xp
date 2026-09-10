@@ -825,7 +825,7 @@ msgstr ""
 #: lib/claper_web/live/event_live/event_card_component.ex:449
 #: lib/claper_web/live/event_live/event_card_component.ex:702
 #, elixir-autogen, elixir-format
-msgid "Are you sure you want to terminate this event? This action cannot be undone."
+msgid "Are you sure you want to terminate this event? You can reactivate it later."
 msgstr ""
 
 #: lib/claper_web/live/user_settings_live/show.html.heex:449
@@ -3591,4 +3591,28 @@ msgstr ""
 #: lib/claper_web/live/event_live/event_form_component.html.heex:344
 #, elixir-autogen, elixir-format
 msgid "name@example.com"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Reactivate from scratch"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Questions, votes, quiz answers and form responses from the previous session will be deleted. Continue?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Event reactivated"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "This code is already used by another active event: change it, then reactivate the event."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Leave empty to make the event available right away."
 msgstr ""

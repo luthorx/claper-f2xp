@@ -264,11 +264,13 @@
             <ClaperWeb.Component.Input.date
               form={f}
               key={:started_at}
-              name={gettext("Start date and time")}
+              name={"#{gettext("Start date and time")} #{gettext("(optional)")}"}
               locale={@current_user.locale}
-              required="true"
             />
-            <p class="text-xs text-base-content/60">{gettext("Shown in your local time.")}</p>
+            <p class="text-xs text-base-content/60">
+              {gettext("Leave empty to make the event available right away.")}
+              {gettext("Shown in your local time.")}
+            </p>
           </div>
         </div>
       </section>
