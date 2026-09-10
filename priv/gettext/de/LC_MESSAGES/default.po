@@ -223,8 +223,8 @@ msgstr "Ihre E-Mail ändern"
 #: lib/claper_web/notifiers/user_notifier.ex:12
 #: lib/claper_web/templates/user_notifier/magic.html.heex:17
 #, elixir-autogen, elixir-format
-msgid "Connect to Claper"
-msgstr "Einloggen zu Claper"
+msgid "Connect to F2XP"
+msgstr "Einloggen zu F2XP"
 
 #: lib/claper_web/templates/user_notifier/magic.html.heex:29
 #, elixir-autogen, elixir-format
@@ -412,8 +412,8 @@ msgstr "Klicken Sie auf <span style='font-weight: 700'>Präsentieren/Anpassen</s
 
 #: lib/claper_web/templates/user_notifier/welcome.html.heex:22
 #, elixir-autogen, elixir-format
-msgid "Congrats! You've taken the first step to improving your presentations. Here are the next steps to create step up your presentations with Claper:"
-msgstr "Herzlichen Glückwunsch! Sie haben den ersten Schritt zur Verbesserung Ihrer Präsentationen getan. Hier sind die nächsten Schritte, um Ihre Präsentationen mit Claper noch ansprechender zu gestalten:"
+msgid "Congrats! You've taken the first step to improving your presentations. Here are the next steps to create step up your presentations with F2XP:"
+msgstr "Herzlichen Glückwunsch! Sie haben den ersten Schritt zur Verbesserung Ihrer Präsentationen getan. Hier sind die nächsten Schritte, um Ihre Präsentationen mit F2XP noch ansprechender zu gestalten:"
 
 #: lib/claper_web/templates/user_notifier/welcome.html.heex:69
 #, elixir-autogen, elixir-format
@@ -982,8 +982,8 @@ msgstr "Aktivieren Sie das Tool in Ihrem LMS"
 
 #: lib/claper_web/templates/lti/registration/new.html.heex:24
 #, elixir-autogen, elixir-format
-msgid "Bring Claper to your LMS"
-msgstr "Bringen Sie Claper zu Ihrem LMS"
+msgid "Bring F2XP to your LMS"
+msgstr "Bringen Sie F2XP zu Ihrem LMS"
 
 #: lib/claper_web/templates/lti/registration/success.html.heex:17
 #, elixir-autogen, elixir-format
@@ -1022,8 +1022,8 @@ msgstr "Ihre nächsten Schritte"
 
 #: lib/claper_web/templates/lti/registration/new.html.heex:36
 #, elixir-autogen, elixir-format
-msgid "Add Claper"
-msgstr "Claper hinzufügen"
+msgid "Add F2XP"
+msgstr "F2XP hinzufügen"
 
 #: lib/claper_web/live/user_settings_live/show.html.heex:356
 #, elixir-autogen, elixir-format
@@ -1142,8 +1142,8 @@ msgstr "CSRF-Verifizierung fehlgeschlagen"
 
 #: lib/claper_web/templates/error/csrf_error.html.heex:17
 #, elixir-autogen, elixir-format
-msgid "Clear cookies (at least for Claper domain)"
-msgstr "Cookies löschen (mindestens für die Claper-Domain)"
+msgid "Clear cookies (at least for F2XP domain)"
+msgstr "Cookies löschen (mindestens für die F2XP-Domain)"
 
 #: lib/claper_web/templates/error/csrf_error.html.heex:20
 #, elixir-autogen, elixir-format
@@ -2492,8 +2492,8 @@ msgstr "Mindestens 6 Zeichen"
 
 #: lib/claper_web/templates/user_registration/new.html.heex:21
 #, elixir-autogen, elixir-format
-msgid "Thousands of presenters already use Claper to engage their audience in real time."
-msgstr "Tausende Referenten nutzen Claper bereits, um ihr Publikum in Echtzeit zum Mitmachen zu bewegen."
+msgid "Thousands of presenters already use F2XP to engage their audience in real time."
+msgstr "Tausende Referenten nutzen F2XP bereits, um ihr Publikum in Echtzeit zum Mitmachen zu bewegen."
 
 #: lib/claper_web/templates/user_registration/new.html.heex:140
 #, elixir-autogen, elixir-format

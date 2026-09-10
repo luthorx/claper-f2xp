@@ -674,7 +674,7 @@ defmodule Claper.Accounts do
          {:ok, user} <- create_oidc_user(updated_attrs) do
       {:ok, user |> Repo.preload(:user)}
     else
-      _ -> {:error, %{reason: :invalid_user, msg: "Invalid Claper user"}}
+      _ -> {:error, %{reason: :invalid_user, msg: "Invalid F2XP user"}}
     end
   end
 

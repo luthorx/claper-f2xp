@@ -40,7 +40,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
           <img src={@thumbnail_url} alt={@event.name} class="w-full h-full object-cover" />
         <% else %>
           <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-            <img src="/images/logo.svg" class="h-12 opacity-30" alt="Claper" />
+            <img src="/images/logo.svg" class="h-12 opacity-30" alt="F2XP" />
           </div>
         <% end %>
         <!-- Processing Overlay -->
@@ -286,7 +286,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
               <img src={@thumbnail_url} alt={@event.name} class="w-full h-full object-cover" />
             <% else %>
               <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                <img src="/images/logo.svg" class="h-6 opacity-30" alt="Claper" />
+                <img src="/images/logo.svg" class="h-6 opacity-30" alt="F2XP" />
               </div>
             <% end %>
             <!-- Processing Overlay -->
@@ -539,7 +539,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
                 <img src={@thumbnail_url} alt={@event.name} class="w-full h-full object-cover" />
               <% else %>
                 <div class="w-full h-full flex items-center justify-center">
-                  <img src="/images/logo.svg" class="h-8 opacity-30" alt="Claper" />
+                  <img src="/images/logo.svg" class="h-8 opacity-30" alt="F2XP" />
                 </div>
               <% end %>
               <!-- Processing Overlay -->

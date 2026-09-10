@@ -80,7 +80,7 @@ defmodule ClaperWeb.Lti.RegistrationController do
       "redirect_uris" => [
         "#{url}/lti/launch"
       ],
-      "client_name" => "Claper",
+      "client_name" => "F2XP",
       "jwks_uri" => "#{url}/.well-known/jwks.json",
       "logo_uri" => "#{url}/images/logo.svg",
       "token_endpoint_auth_method" => "private_key_jwt",

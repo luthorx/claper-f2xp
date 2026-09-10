@@ -247,8 +247,8 @@ config :claper, :presentations,
   s3_public_url: s3_public_url
 
 config :claper, :mail,
-  from: get_var_from_path_or_env(config_dir, "MAIL_FROM", "noreply@claper.co"),
-  from_name: get_var_from_path_or_env(config_dir, "MAIL_FROM_NAME", "Claper")
+  from: get_var_from_path_or_env(config_dir, "MAIL_FROM", "noreply@f2xp.com"),
+  from_name: get_var_from_path_or_env(config_dir, "MAIL_FROM_NAME", "F2XP")
 
 config :claper, ClaperWeb.MailboxGuard,
   username: get_var_from_path_or_env(config_dir, "MAILBOX_USER", nil),
