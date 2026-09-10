@@ -1,0 +1,39 @@
+# Ambiente di test locale del fork F2XP, costruito dal codice di questo repository.
+#
+#   docker compose -f compose.test.yml up -d --build
+#   docker compose -f compose.test.yml down        # ferma, i dati restano
+#   docker compose -f compose.test.yml down -v     # ferma e CANCELLA database e upload di test
+#
+# Nome progetto e volumi separati: non tocca altre installazioni di Claper.
+name: claper-f2xp-test
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - "db:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "claper", "-U", "claper"]
+      retries: 10
+      interval: 3s
+      timeout: 5s
+    environment:
+      POSTGRES_PASSWORD: claper
+      POSTGRES_USER: claper
+      POSTGRES_DB: claper
+
+  app:
+    build: .
+    image: claper-f2xp:test
+    ports:
+      - "4000:4000"
+    volumes:
+      - "uploads:/app/uploads"
+    env_file: .env.test
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db:
+  uploads:
