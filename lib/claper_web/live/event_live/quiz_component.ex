@@ -6,6 +6,8 @@ defmodule ClaperWeb.EventLive.QuizComponent do
     assigns =
       assigns
       |> assign_new(:focus_mode, fn -> false end)
+      |> assign_new(:quiz_time_up, fn -> false end)
+      |> assign(:deadline, Claper.Quizzes.deadline(assigns.quiz))
       |> assign(:is_submitted, length(assigns.current_quiz_responses) > 0)
       |> assign(
         :current_question,
@@ -19,6 +21,9 @@ defmodule ClaperWeb.EventLive.QuizComponent do
         :response_opt_ids,
         Enum.map(assigns.current_quiz_responses, & &1.quiz_question_opt_id)
       )
+
+    # Time ran out before any answer was sent
+    assigns = assign(assigns, :locked, assigns.quiz_time_up and not assigns.is_submitted)
 
     ~H"""
     <div class="font-display">
@@ -82,8 +87,17 @@ defmodule ClaperWeb.EventLive.QuizComponent do
             </svg>
           </button>
 
-          <p class="mb-1 text-xs font-semibold text-gray-400">{gettext("Current quiz")}</p>
-          <%= if is_nil(@current_question) do %>
+          <div class="mb-1 flex items-center justify-between gap-2">
+            <p class="text-xs font-semibold text-gray-400">{gettext("Current quiz")}</p>
+            <ClaperWeb.EventLive.QuizCountdownComponent.countdown
+              :if={@deadline && !@is_submitted && !@locked}
+              id={"quiz-countdown-#{@quiz.id}"}
+              deadline={@deadline}
+              title={gettext("Time left")}
+              class="rounded-full bg-white/10 px-2 py-0.5 text-sm font-bold text-white"
+            />
+          </div>
+          <%= if is_nil(@current_question) or @locked do %>
             <p class="mb-2 text-lg font-bold leading-snug text-white">{@quiz.title}</p>
           <% else %>
             <p class="mb-1 text-lg font-bold leading-snug text-white">
@@ -99,7 +113,13 @@ defmodule ClaperWeb.EventLive.QuizComponent do
             </p>
           <% end %>
         </div>
-        <div>
+        <div :if={@locked} id="quiz-time-up" class="mt-4 flex flex-col items-center text-center">
+          <p class="text-2xl font-bold text-white">{gettext("Time is up")}</p>
+          <p class="mt-2 text-sm text-gray-400">
+            {gettext("The time to answer this quiz is over.")}
+          </p>
+        </div>
+        <div :if={!@locked}>
           <div class="flex max-h-[500px] flex-col gap-2 overflow-y-auto">
             <%= if @current_question do %>
               <%= for {opt, _idx} <- Enum.with_index(@current_question.quiz_question_opts) do %>

@@ -333,6 +333,110 @@ defmodule ClaperWeb.EventLiveTest do
     end
   end
 
+  describe "Timed quiz" do
+    setup [:register_and_log_in_user, :create_event]
+
+    defp start_timed_quiz(presentation_file, time_limit) do
+      quiz =
+        quiz_fixture(%{presentation_file: presentation_file, position: 0, time_limit: time_limit})
+
+      {:ok, started} = Claper.Quizzes.set_enabled(quiz.id)
+      {quiz, started}
+    end
+
+    test "counts down and sends the chosen answers when time is up", %{
+      conn: conn,
+      user: user,
+      presentation_file: presentation_file
+    } do
+      {quiz, started} = start_timed_quiz(presentation_file, 60)
+      [correct, _wrong] = List.first(quiz.quiz_questions).quiz_question_opts
+
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+      assert has_element?(show_live, ~s([id^="quiz-countdown-#{quiz.id}-"]))
+
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(correct.id)})
+      send(show_live.pid, {:quiz_time_up, quiz.id, Claper.Quizzes.deadline(started)})
+      render(show_live)
+
+      assert [%{quiz_question_opt_id: opt_id}] =
+               Claper.Quizzes.get_quiz_responses(user.id, quiz.id)
+
+      assert opt_id == correct.id
+    end
+
+    test "locks the quiz when time is up", %{
+      conn: conn,
+      user: user,
+      presentation_file: presentation_file
+    } do
+      {quiz, started} = start_timed_quiz(presentation_file, 30)
+      [opt | _] = List.first(quiz.quiz_questions).quiz_question_opts
+
+      started
+      |> Ecto.Changeset.change(started_at: DateTime.add(started.started_at, -120))
+      |> Claper.Repo.update!()
+
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+      assert has_element?(show_live, "#quiz-time-up", "Time is up")
+
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(opt.id)})
+      render_click(show_live, "submit-quiz", %{})
+
+      assert Claper.Quizzes.get_quiz_responses(user.id, quiz.id) == []
+    end
+
+    test "shows the countdown on the presentation and the manage page", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      {quiz, _started} = start_timed_quiz(presentation_file, 90)
+      code = presentation_file.event.code
+
+      {:ok, presenter_live, _html} = live(conn, ~p"/e/#{code}/presenter")
+      assert has_element?(presenter_live, ~s([id^="presenter-quiz-countdown-#{quiz.id}-"]))
+
+      {:ok, manage_live, _html} = live(conn, ~p"/e/#{code}/manage")
+
+      assert has_element?(
+               manage_live,
+               ~s([id^="settings-pane-interaction-options-quiz-countdown-"])
+             )
+    end
+
+    test "the quiz editor sets a time limit", %{conn: conn, presentation_file: presentation_file} do
+      {:ok, manage_live, _html} =
+        live(conn, ~p"/e/#{presentation_file.event.code}/manage/add/quiz")
+
+      assert has_element?(
+               manage_live,
+               ~s(select[name="quiz[time_limit]"] option[value="120"]),
+               "2 min"
+             )
+
+      manage_live
+      |> form("#form-quiz",
+        quiz: %{
+          title: "Timed quiz",
+          time_limit: "120",
+          quiz_questions: %{
+            "0" => %{
+              content: "Question",
+              quiz_question_opts: %{
+                "0" => %{content: "A", is_correct: "true"},
+                "1" => %{content: "B", is_correct: "false"}
+              }
+            }
+          }
+        }
+      )
+      |> render_submit()
+
+      assert [%{title: "Timed quiz", time_limit: 120}] =
+               Claper.Quizzes.list_quizzes_at_position(presentation_file.id, 0)
+    end
+  end
+
   describe "Manage" do
     setup [:register_and_log_in_user, :create_event]
 

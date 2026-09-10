@@ -206,6 +206,20 @@
     <div class="flex flex-col gap-1">
       <p class="text-sm font-bold text-base-content">{gettext("Options")}</p>
 
+      <div class="mb-2 flex flex-col gap-1">
+        <.select_field
+          form={f}
+          key={:time_limit}
+          label={gettext("Time limit")}
+          options={time_limit_options(f)}
+        />
+        <p class="text-xs text-gray-500">
+          {gettext(
+            "The countdown starts when you activate the quiz. When time is up, attendees can no longer answer and the answers they already chose are sent."
+          )}
+        </p>
+      </div>
+
       <.checkbox form={f} key={:allow_anonymous} label={gettext("Allow anonymous submissions")} />
     </div>
 

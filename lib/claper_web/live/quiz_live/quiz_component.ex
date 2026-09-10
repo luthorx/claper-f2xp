@@ -144,6 +144,33 @@ defmodule ClaperWeb.QuizLive.QuizComponent do
 
   defp keep_newest_correct_answer(question, _previous), do: question
 
+  @time_limits [30, 60, 120, 180, 300, 600, 900, 1200, 1800, 2700, 3600]
+
+  defp time_limit_options(form) do
+    current =
+      case Phoenix.HTML.Form.input_value(form, :time_limit) do
+        seconds when is_integer(seconds) -> seconds
+        value when is_binary(value) -> with {seconds, ""} <- Integer.parse(value), do: seconds
+        _ -> nil
+      end
+
+    limits =
+      if is_integer(current) and current not in @time_limits,
+        do: Enum.sort([current | @time_limits]),
+        else: @time_limits
+
+    [{gettext("No limit"), ""} | Enum.map(limits, &{time_limit_label(&1), &1})]
+  end
+
+  defp time_limit_label(seconds) when seconds < 60, do: gettext("%{count} s", count: seconds)
+
+  defp time_limit_label(seconds) when rem(seconds, 60) == 0,
+    do: gettext("%{count} min", count: div(seconds, 60))
+
+  defp time_limit_label(seconds),
+    do:
+      "#{gettext("%{count} min", count: div(seconds, 60))} #{gettext("%{count} s", count: rem(seconds, 60))}"
+
   defp save_quiz(socket, :edit, quiz_params) do
     case Quizzes.update_quiz(
            socket.assigns.event.uuid,

@@ -128,6 +128,7 @@ defmodule Claper.Interactions.Import do
        title: quiz.title,
        show_results: quiz.show_results,
        allow_anonymous: quiz.allow_anonymous,
+       time_limit: quiz.time_limit,
        position: position,
        enabled: false,
        quiz_questions:

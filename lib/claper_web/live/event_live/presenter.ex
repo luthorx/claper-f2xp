@@ -300,9 +300,16 @@ defmodule ClaperWeb.EventLive.Presenter do
         {:current_interaction, %Quiz{} = interaction},
         socket
       ) do
+    # Reloaded because the broadcast copy predates the start of the time limit
+    quiz =
+      Claper.Quizzes.get_quiz!(interaction.id, [
+        :quiz_questions,
+        quiz_questions: :quiz_question_opts
+      ])
+
     {:noreply,
      socket
-     |> assign(:current_quiz, interaction)
+     |> assign(:current_quiz, quiz)
      |> assign(:current_poll, nil)
      |> assign(:current_embed, nil)
      |> assign(:current_form, nil)}

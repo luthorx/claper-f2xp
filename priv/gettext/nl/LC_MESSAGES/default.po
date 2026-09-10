@@ -3922,3 +3922,35 @@ msgstr "onbekend type \"%{type}\", gebruik QUIZ of POLL"
 #, elixir-autogen, elixir-format
 msgid "…and %{count} more"
 msgstr "…en nog %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} min"
+msgstr "%{count} min"
+
+#, elixir-autogen, elixir-format
+msgid "%{count} s"
+msgstr "%{count} s"
+
+#, elixir-autogen, elixir-format
+msgid "No limit"
+msgstr "Geen limiet"
+
+#, elixir-autogen, elixir-format
+msgid "The countdown starts when you activate the quiz. When time is up, attendees can no longer answer and the answers they already chose are sent."
+msgstr "Het aftellen begint wanneer je de quiz activeert. Als de tijd om is, kunnen deelnemers niet meer antwoorden en worden de al gekozen antwoorden verzonden."
+
+#, elixir-autogen, elixir-format
+msgid "The time to answer this quiz is over."
+msgstr "De tijd om deze quiz te beantwoorden is voorbij."
+
+#, elixir-autogen, elixir-format
+msgid "Time is up"
+msgstr "De tijd is om"
+
+#, elixir-autogen, elixir-format
+msgid "Time left"
+msgstr "Resterende tijd"
+
+#, elixir-autogen, elixir-format
+msgid "Time limit"
+msgstr "Tijdslimiet"

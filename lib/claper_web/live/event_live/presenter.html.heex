@@ -86,6 +86,19 @@
       quiz={@current_quiz}
       iframe={@iframe}
     />
+    <% quiz_deadline = Claper.Quizzes.deadline(@current_quiz) %>
+    <div
+      :if={quiz_deadline}
+      class={[
+        "absolute right-5 top-5 z-40 rounded-2xl bg-black/80 font-bold text-white shadow-lg",
+        if(@iframe, do: "px-3 py-1 text-xl", else: "px-6 py-3 text-5xl")
+      ]}
+    >
+      <ClaperWeb.EventLive.QuizCountdownComponent.countdown
+        id={"presenter-quiz-countdown-#{@current_quiz.id}"}
+        deadline={quiz_deadline}
+      />
+    </div>
   <% end %>
   <!-- MESSAGES -->
   <div

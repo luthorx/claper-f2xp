@@ -178,6 +178,44 @@ defmodule Claper.QuizzesTest do
       refute updated_quiz.enabled
     end
 
+    test "activating a quiz starts its time limit and deactivating it stops it" do
+      quiz = quiz_fixture(%{enabled: false, time_limit: 60})
+      assert Quizzes.deadline(quiz) == nil
+
+      assert {:ok, started} = Quizzes.set_enabled(quiz.id)
+      assert %DateTime{} = started.started_at
+      assert Quizzes.deadline(started) == DateTime.add(started.started_at, 60)
+
+      assert {:ok, stopped} = Quizzes.set_disabled(quiz.id)
+      assert stopped.started_at == nil
+      assert Quizzes.deadline(stopped) == nil
+    end
+
+    test "answers are accepted until the deadline plus a short grace" do
+      {:ok, quiz} = Quizzes.set_enabled(quiz_fixture(%{time_limit: 30}).id)
+      deadline = Quizzes.deadline(quiz)
+
+      refute Quizzes.time_up?(quiz, DateTime.add(deadline, -1))
+      assert Quizzes.time_up?(quiz, deadline)
+      assert Quizzes.accepting_responses?(quiz, DateTime.add(deadline, 5))
+      refute Quizzes.accepting_responses?(quiz, DateTime.add(deadline, 6))
+
+      untimed = quiz_fixture(%{enabled: true})
+      refute Quizzes.time_up?(untimed)
+      assert Quizzes.accepting_responses?(untimed)
+    end
+
+    test "the time limit must be between one second and three hours" do
+      errors = fn value ->
+        Quizzes.change_quiz(%Claper.Quizzes.Quiz{}, %{"time_limit" => value}).errors
+      end
+
+      assert Keyword.has_key?(errors.("0"), :time_limit)
+      assert Keyword.has_key?(errors.("10801"), :time_limit)
+      refute Keyword.has_key?(errors.("120"), :time_limit)
+      refute Keyword.has_key?(errors.(""), :time_limit)
+    end
+
     test "submit_quiz/4 with duplicate opts deduplicates by id" do
       quiz = quiz_fixture()
       event_uuid = Ecto.UUID.generate()

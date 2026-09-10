@@ -640,6 +640,37 @@ Hooks.AttendeeFocus = {
   },
 };
 
+// Ticks the time left to answer a quiz; the deadline comes from the server
+Hooks.QuizCountdown = {
+  mounted() {
+    this.start();
+  },
+  updated() {
+    this.start();
+  },
+  destroyed() {
+    window.clearInterval(this.interval);
+  },
+  start() {
+    window.clearInterval(this.interval);
+    // Compensates for a device clock that differs from the server one
+    const offset = Number(this.el.dataset.now) - Date.now();
+    const deadline = Number(this.el.dataset.deadline);
+    const label = this.el.querySelector("[data-countdown-label]") || this.el;
+
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((deadline - Date.now() - offset) / 1000));
+      const seconds = String(remaining % 60).padStart(2, "0");
+      label.textContent = `${Math.floor(remaining / 60)}:${seconds}`;
+      label.style.color = remaining <= 10 ? "#f87171" : "";
+      if (remaining === 0) window.clearInterval(this.interval);
+    };
+
+    tick();
+    this.interval = window.setInterval(tick, 250);
+  },
+};
+
 Hooks.AttendeeCaptions = {
   mounted() {
     this.collapseKey = this.el.dataset.collapseKey;

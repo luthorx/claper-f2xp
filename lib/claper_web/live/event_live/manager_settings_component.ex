@@ -7,6 +7,7 @@ defmodule ClaperWeb.EventLive.ManagerSettingsComponent do
     ~H"""
     <div class="flex flex-col gap-4 p-4">
       <ClaperWeb.EventLive.ManageInteractionOptionsComponent.render
+        id={"#{@id}-interaction-options"}
         current_interaction={@current_interaction}
         state={@state}
         create={@create}

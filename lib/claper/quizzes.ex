@@ -9,6 +9,9 @@ defmodule Claper.Quizzes do
   alias Claper.Quizzes.QuizQuestionOpt
   alias Claper.Quizzes.QuizResponse
 
+  # Answers sent right when the time runs out still count
+  @answer_grace_seconds 5
+
   @doc """
   Returns the list of quizzes for a given presentation file.
 
@@ -624,19 +627,54 @@ defmodule Claper.Quizzes do
     from(q in Quiz,
       where: q.presentation_file_id == ^presentation_file_id and q.position == ^position
     )
-    |> Repo.update_all(set: [enabled: false])
+    |> Repo.update_all(set: [enabled: false, started_at: nil])
   end
 
+  # Activating a quiz starts its time limit, if it has one
   def set_enabled(id) do
     get_quiz!(id)
-    |> Ecto.Changeset.change(enabled: true)
+    |> Ecto.Changeset.change(
+      enabled: true,
+      started_at: DateTime.utc_now() |> DateTime.truncate(:second)
+    )
     |> Repo.update()
   end
 
   def set_disabled(id) do
     get_quiz!(id)
-    |> Ecto.Changeset.change(enabled: false)
+    |> Ecto.Changeset.change(enabled: false, started_at: nil)
     |> Repo.update()
+  end
+
+  @doc """
+  Returns when the time to answer a running quiz runs out, or `nil` when the
+  quiz has no time limit or is not active.
+  """
+  def deadline(%Quiz{enabled: true, time_limit: limit, started_at: %DateTime{} = started_at})
+      when is_integer(limit),
+      do: DateTime.add(started_at, limit)
+
+  def deadline(_quiz), do: nil
+
+  @doc """
+  Tells whether the time to answer the quiz has run out.
+  """
+  def time_up?(quiz, now \\ DateTime.utc_now()) do
+    case deadline(quiz) do
+      nil -> false
+      deadline -> DateTime.compare(now, deadline) != :lt
+    end
+  end
+
+  @doc """
+  Tells whether answers to the quiz can still be submitted, allowing a few
+  seconds for answers sent right when the time runs out.
+  """
+  def accepting_responses?(quiz, now \\ DateTime.utc_now()) do
+    case deadline(quiz) do
+      nil -> true
+      deadline -> DateTime.compare(now, DateTime.add(deadline, @answer_grace_seconds)) != :gt
+    end
   end
 
   defp broadcast({:ok, quiz, event_uuid}, event) do

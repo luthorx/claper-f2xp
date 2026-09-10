@@ -101,6 +101,7 @@ defmodule ClaperWeb.EventLive.Show do
       |> assign(:selected_poll_opt, [])
       |> assign(:selected_quiz_question_opts, [])
       |> assign(:current_quiz_question_idx, 0)
+      |> assign(:quiz_time_up, false)
       |> assign(:event, event)
       |> assign(:state, event.presentation_file.presentation_state)
       |> assign(:slide_urls, slide_urls)
@@ -390,6 +391,21 @@ defmodule ClaperWeb.EventLive.Show do
   def handle_info({:transcription_config_deleted, _config}, socket) do
     {:noreply, socket |> assign(:transcription_config, nil)}
   end
+
+  @impl true
+  def handle_info(
+        {:quiz_time_up, quiz_id, deadline},
+        %{assigns: %{current_interaction: %Quizzes.Quiz{id: quiz_id} = quiz}} = socket
+      ) do
+    # A deadline that changed meanwhile (quiz restarted or edited) has its own timer
+    if Quizzes.deadline(quiz) == deadline do
+      {:noreply, socket |> assign(:quiz_time_up, true) |> submit_selected_answers()}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info({:quiz_time_up, _quiz_id, _deadline}, socket), do: {:noreply, socket}
 
   @impl true
   def handle_info(_, socket) do
@@ -727,6 +743,14 @@ defmodule ClaperWeb.EventLive.Show do
   @impl true
   def handle_event(
         "select-quiz-question-opt",
+        _params,
+        %{assigns: %{quiz_time_up: true}} = socket
+      ) do
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "select-quiz-question-opt",
         %{"opt" => opt},
         socket
       ) do
@@ -764,46 +788,11 @@ defmodule ClaperWeb.EventLive.Show do
   end
 
   @impl true
-  def handle_event(
-        "submit-quiz",
-        _params,
-        %{assigns: %{current_user: current_user, selected_quiz_question_opts: opts}} = socket
-      )
-      when is_map(current_user) do
-    case Claper.Quizzes.submit_quiz(
-           current_user,
-           socket.assigns.event.uuid,
-           opts,
-           socket.assigns.current_interaction.id
-         ) do
-      {:ok, quiz} ->
-        {:noreply,
-         socket
-         |> load_current_interaction(quiz, true)
-         |> assign(:selected_quiz_question_opts, [])
-         |> assign(:current_quiz_question_idx, socket.assigns.current_quiz_question_idx + 1)}
-    end
-  end
-
-  @impl true
-  def handle_event(
-        "submit-quiz",
-        _params,
-        %{assigns: %{attendee_identifier: attendee_identifier, selected_quiz_question_opts: opts}} =
-          socket
-      ) do
-    case Claper.Quizzes.submit_quiz(
-           attendee_identifier,
-           socket.assigns.event.uuid,
-           opts,
-           socket.assigns.current_interaction.id
-         ) do
-      {:ok, quiz} ->
-        {:noreply,
-         socket
-         |> load_current_interaction(quiz, true)
-         |> assign(:selected_quiz_question_opts, [])
-         |> assign(:current_quiz_question_idx, socket.assigns.current_quiz_question_idx + 1)}
+  def handle_event("submit-quiz", _params, socket) do
+    if Quizzes.accepting_responses?(socket.assigns.current_interaction) do
+      {:noreply, submit_quiz_answers(socket)}
+    else
+      {:noreply, assign(socket, :quiz_time_up, true)}
     end
   end
 
@@ -1013,6 +1002,7 @@ defmodule ClaperWeb.EventLive.Show do
       socket
       |> assign(:current_interaction, quiz)
       |> get_current_quiz_reponses(interaction.id)
+      |> schedule_quiz_time_up(quiz)
 
     if same_interaction do
       socket
@@ -1030,6 +1020,48 @@ defmodule ClaperWeb.EventLive.Show do
 
   defp load_current_interaction(socket, interaction, _same_interaction) do
     socket |> assign(:current_interaction, interaction)
+  end
+
+  # The server decides when time is up, whatever the clock of the attendee's device
+  defp schedule_quiz_time_up(socket, quiz) do
+    deadline = Quizzes.deadline(quiz)
+    socket = assign(socket, :quiz_time_up, Quizzes.time_up?(quiz))
+
+    if is_nil(deadline) or socket.assigns[:scheduled_quiz_deadline] == {quiz.id, deadline} do
+      socket
+    else
+      delay = max(DateTime.diff(deadline, DateTime.utc_now(), :millisecond), 0)
+      Process.send_after(self(), {:quiz_time_up, quiz.id, deadline}, delay)
+      assign(socket, :scheduled_quiz_deadline, {quiz.id, deadline})
+    end
+  end
+
+  # When time runs out, the answers already chosen are sent as they are
+  defp submit_selected_answers(%{assigns: assigns} = socket) do
+    if assigns.current_quiz_responses == [] and assigns.selected_quiz_question_opts != [] and
+         (is_map(assigns.current_user) or assigns.current_interaction.allow_anonymous) do
+      submit_quiz_answers(socket)
+    else
+      socket
+    end
+  end
+
+  defp submit_quiz_answers(%{assigns: assigns} = socket) do
+    participant =
+      if is_map(assigns.current_user), do: assigns.current_user, else: assigns.attendee_identifier
+
+    {:ok, quiz} =
+      Quizzes.submit_quiz(
+        participant,
+        assigns.event.uuid,
+        assigns.selected_quiz_question_opts,
+        assigns.current_interaction.id
+      )
+
+    socket
+    |> load_current_interaction(quiz, true)
+    |> assign(:selected_quiz_question_opts, [])
+    |> assign(:current_quiz_question_idx, length(quiz.quiz_questions))
   end
 
   defp maybe_reset_selected_poll_opt(socket, true) do

@@ -2,6 +2,8 @@ defmodule Claper.Quizzes.Quiz do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @max_time_limit 3 * 60 * 60
+
   @type t :: %__MODULE__{
           id: integer(),
           title: String.t(),
@@ -9,6 +11,8 @@ defmodule Claper.Quizzes.Quiz do
           enabled: boolean(),
           show_results: boolean(),
           allow_anonymous: boolean(),
+          time_limit: integer() | nil,
+          started_at: DateTime.t() | nil,
           lti_line_item_url: String.t() | nil,
           lti_resource: Lti13.Resources.Resource.t() | nil,
           quiz_responses: [Claper.Quizzes.QuizResponse.t()] | nil,
@@ -24,6 +28,9 @@ defmodule Claper.Quizzes.Quiz do
     field :enabled, :boolean, default: false
     field :show_results, :boolean, default: true
     field :allow_anonymous, :boolean, default: false
+    # Seconds to answer, counted from started_at (set when the quiz is activated)
+    field :time_limit, :integer
+    field :started_at, :utc_datetime
     field :lti_line_item_url, :string
 
     belongs_to :presentation_file, Claper.Presentations.PresentationFile
@@ -48,10 +55,12 @@ defmodule Claper.Quizzes.Quiz do
       :enabled,
       :show_results,
       :allow_anonymous,
+      :time_limit,
       :lti_resource_id,
       :lti_line_item_url
     ])
     |> validate_required([:title, :position, :presentation_file_id])
+    |> validate_number(:time_limit, greater_than: 0, less_than_or_equal_to: @max_time_limit)
     |> cast_assoc(:quiz_questions,
       required: true,
       with: &Claper.Quizzes.QuizQuestion.changeset/2,

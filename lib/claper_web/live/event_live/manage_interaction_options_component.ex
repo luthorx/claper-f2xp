@@ -4,7 +4,10 @@ defmodule ClaperWeb.EventLive.ManageInteractionOptionsComponent do
   use Gettext, backend: ClaperWeb.Gettext
 
   def render(assigns) do
-    assigns = assigns |> assign_new(:show_shortcut, fn -> true end)
+    assigns =
+      assigns
+      |> assign_new(:show_shortcut, fn -> true end)
+      |> assign_new(:id, fn -> "interaction-options" end)
 
     ~H"""
     <div class="flex flex-col gap-2 border border-gray-200 rounded-2xl p-2 bg-white shadow-lg">
@@ -81,6 +84,34 @@ defmodule ClaperWeb.EventLive.ManageInteractionOptionsComponent do
             </.toggle_row>
           <% %Claper.Quizzes.Quiz{} -> %>
             <div class="space-y-2">
+              <% deadline = Claper.Quizzes.deadline(@current_interaction) %>
+              <div
+                :if={deadline}
+                class="flex items-center gap-2 rounded-full border border-gray-200 bg-white py-2 pl-2 pr-3"
+              >
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-secondary-500">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="h-5 w-5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                </div>
+                <span class="flex-1 text-xs text-gray-700">{gettext("Time left")}</span>
+                <ClaperWeb.EventLive.QuizCountdownComponent.countdown
+                  id={"#{@id}-quiz-countdown-#{@current_interaction.id}"}
+                  deadline={deadline}
+                  class="text-sm font-bold text-secondary-500"
+                />
+              </div>
               <.toggle_row
                 label={
                   if @current_interaction.show_results,
