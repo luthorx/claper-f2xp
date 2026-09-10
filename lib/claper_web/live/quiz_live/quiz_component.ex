@@ -32,6 +32,8 @@ defmodule ClaperWeb.QuizLive.QuizComponent do
 
   @impl true
   def handle_event("validate", %{"quiz" => quiz_params}, socket) do
+    quiz_params = keep_single_correct_answer(quiz_params, socket.assigns.changeset)
+
     changeset =
       socket.assigns.quiz
       |> Quizzes.change_quiz(quiz_params)
@@ -90,6 +92,57 @@ defmodule ClaperWeb.QuizLive.QuizComponent do
     index = String.to_integer(index)
     {:noreply, assign(socket, :current_quiz_question_index, index)}
   end
+
+  # When a question doesn't allow multiple answers, marking a new correct answer
+  # unmarks the previous one instead of failing validation
+  defp keep_single_correct_answer(%{"quiz_questions" => questions} = params, changeset)
+       when is_map(questions) do
+    previous_questions = Ecto.Changeset.get_field(changeset, :quiz_questions) || []
+
+    questions =
+      Map.new(questions, fn {index, question} ->
+        previous =
+          case Integer.parse(index) do
+            {i, ""} -> Enum.at(previous_questions, i)
+            _ -> nil
+          end
+
+        {index, keep_newest_correct_answer(question, previous)}
+      end)
+
+    Map.put(params, "quiz_questions", questions)
+  end
+
+  defp keep_single_correct_answer(params, _changeset), do: params
+
+  defp keep_newest_correct_answer(%{"allow_multiple" => "true"} = question, _previous),
+    do: question
+
+  defp keep_newest_correct_answer(
+         %{"quiz_question_opts" => opts} = question,
+         %{quiz_question_opts: previous_opts}
+       )
+       when is_map(opts) and is_list(previous_opts) do
+    checked = for {index, %{"is_correct" => "true"}} <- opts, do: index
+
+    previously_checked =
+      for {opt, index} <- Enum.with_index(previous_opts), opt.is_correct, do: to_string(index)
+
+    case {checked, checked -- previously_checked} do
+      {[_, _ | _], [newest]} ->
+        opts =
+          Map.new(opts, fn {index, opt} ->
+            {index, Map.put(opt, "is_correct", to_string(index == newest))}
+          end)
+
+        Map.put(question, "quiz_question_opts", opts)
+
+      _ ->
+        question
+    end
+  end
+
+  defp keep_newest_correct_answer(question, _previous), do: question
 
   defp save_quiz(socket, :edit, quiz_params) do
     case Quizzes.update_quiz(

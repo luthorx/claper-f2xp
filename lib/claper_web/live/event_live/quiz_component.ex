@@ -89,8 +89,13 @@ defmodule ClaperWeb.EventLive.QuizComponent do
             <p class="mb-1 text-lg font-bold leading-snug text-white">
               {@current_question.content}
             </p>
-            <p class="mb-4 text-sm text-gray-400">
+            <p class={["text-sm text-gray-400", if(@is_submitted, do: "mb-4", else: "mb-1")]}>
               {@current_quiz_question_idx + 1}/{length(@quiz.quiz_questions)}
+            </p>
+            <p :if={!@is_submitted} id="quiz-selection-hint" class="mb-4 text-sm text-gray-400">
+              {if @current_question.allow_multiple,
+                do: gettext("Select one or multiple options"),
+                else: gettext("Select one option")}
             </p>
           <% end %>
         </div>
@@ -111,7 +116,8 @@ defmodule ClaperWeb.EventLive.QuizComponent do
                   ]}>
                     <div class="flex min-w-0 items-center gap-3 text-left">
                       <span class={[
-                        "grid h-4 w-4 shrink-0 place-items-center rounded border-2",
+                        "grid h-4 w-4 shrink-0 place-items-center border-2",
+                        if(@current_question.allow_multiple, do: "rounded", else: "rounded-full"),
                         opt.is_correct && "border-supporting-green-500",
                         !opt.is_correct && selected && "border-supporting-red-400",
                         !opt.is_correct && !selected && "border-gray-500"
@@ -119,7 +125,11 @@ defmodule ClaperWeb.EventLive.QuizComponent do
                         <span
                           :if={selected}
                           class={[
-                            "h-1.5 w-1.5 rounded-sm",
+                            "h-1.5 w-1.5",
+                            if(@current_question.allow_multiple,
+                              do: "rounded-sm",
+                              else: "rounded-full"
+                            ),
                             opt.is_correct && "bg-supporting-green-500",
                             !opt.is_correct && "bg-supporting-red-400"
                           ]}
@@ -150,7 +160,8 @@ defmodule ClaperWeb.EventLive.QuizComponent do
                   >
                     <div class="flex min-w-0 items-center gap-3 text-left">
                       <span class={[
-                        "grid h-4 w-4 shrink-0 place-items-center rounded border-2",
+                        "grid h-4 w-4 shrink-0 place-items-center border-2",
+                        if(@current_question.allow_multiple, do: "rounded", else: "rounded-full"),
                         Enum.any?(@selected_quiz_question_opts, &(&1.id == opt.id)) &&
                           "border-primary-300",
                         !Enum.any?(@selected_quiz_question_opts, &(&1.id == opt.id)) &&
@@ -158,7 +169,13 @@ defmodule ClaperWeb.EventLive.QuizComponent do
                       ]}>
                         <span
                           :if={Enum.any?(@selected_quiz_question_opts, &(&1.id == opt.id))}
-                          class="h-1.5 w-1.5 rounded-sm bg-primary-300"
+                          class={[
+                            "h-1.5 w-1.5 bg-primary-300",
+                            if(@current_question.allow_multiple,
+                              do: "rounded-sm",
+                              else: "rounded-full"
+                            )
+                          ]}
                         >
                         </span>
                       </span>

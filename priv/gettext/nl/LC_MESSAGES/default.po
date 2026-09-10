@@ -3622,3 +3622,7 @@ msgstr "Laat leeg om het evenement meteen beschikbaar te maken."
 #, elixir-autogen, elixir-format
 msgid "The presentation will appear here."
 msgstr "De presentatie verschijnt hier."
+
+#, elixir-autogen, elixir-format
+msgid "must have exactly one correct answer unless multiple answers are allowed"
+msgstr "moet precies één juist antwoord hebben als meerdere antwoorden niet zijn toegestaan"

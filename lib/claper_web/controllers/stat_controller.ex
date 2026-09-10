@@ -302,7 +302,7 @@ defmodule ClaperWeb.StatController do
           <material>
             <mattext>#{question.content}</mattext>
           </material>
-          <response_lid ident="RESPONSE" rcardinality="Multiple">
+          <response_lid ident="RESPONSE" rcardinality="#{if question.allow_multiple, do: "Multiple", else: "Single"}">
             <render_choice>
               #{Enum.map_join(question.quiz_question_opts, "\n", &generate_qti_option/1)}
             </render_choice>

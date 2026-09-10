@@ -2,7 +2,7 @@ defmodule ClaperWeb.EventLiveTest do
   use ClaperWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Claper.{FormsFixtures, PresentationsFixtures}
+  import Claper.{FormsFixtures, PresentationsFixtures, QuizzesFixtures}
 
   @update_attrs %{name: "some updated name"}
 
@@ -270,10 +270,109 @@ defmodule ClaperWeb.EventLiveTest do
       assert has_element?(show_live, "#post-form")
       assert has_element?(show_live, ~s(#focus-slot[data-focus-fill="false"]))
     end
+
+    test "a single-answer quiz question keeps only the latest choice", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      quiz = quiz_fixture(%{presentation_file: presentation_file, position: 0, enabled: true})
+      [first, second] = List.first(quiz.quiz_questions).quiz_question_opts
+
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+      assert has_element?(show_live, "#quiz-selection-hint", "Select one option")
+
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(first.id)})
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(second.id)})
+
+      assert has_element?(
+               show_live,
+               ~s(button[phx-value-opt="#{second.id}"][aria-pressed="true"])
+             )
+
+      assert has_element?(
+               show_live,
+               ~s(button[phx-value-opt="#{first.id}"][aria-pressed="false"])
+             )
+    end
+
+    test "a multiple-answer quiz question keeps every choice", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      quiz =
+        quiz_fixture(%{
+          presentation_file: presentation_file,
+          position: 0,
+          enabled: true,
+          quiz_questions: [
+            %{
+              content: "Pick both",
+              allow_multiple: true,
+              quiz_question_opts: [
+                %{content: "A", is_correct: true},
+                %{content: "B", is_correct: true}
+              ]
+            }
+          ]
+        })
+
+      [first, second] = List.first(quiz.quiz_questions).quiz_question_opts
+
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+      assert has_element?(show_live, "#quiz-selection-hint", "Select one or multiple options")
+
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(first.id)})
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(second.id)})
+
+      assert has_element?(show_live, ~s(button[phx-value-opt="#{first.id}"][aria-pressed="true"]))
+
+      assert has_element?(
+               show_live,
+               ~s(button[phx-value-opt="#{second.id}"][aria-pressed="true"])
+             )
+    end
   end
 
   describe "Manage" do
     setup [:register_and_log_in_user, :create_event]
+
+    test "quiz editor keeps a single correct answer when multiple answers are off", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      {:ok, manage_live, _html} =
+        live(conn, ~p"/e/#{presentation_file.event.code}/manage/add/quiz")
+
+      change = fn first_correct, second_correct ->
+        manage_live
+        |> form("#form-quiz",
+          quiz: %{
+            title: "Quiz",
+            quiz_questions: %{
+              "0" => %{
+                content: "Question",
+                allow_multiple: "false",
+                quiz_question_opts: %{
+                  "0" => %{content: "A", is_correct: first_correct},
+                  "1" => %{content: "B", is_correct: second_correct}
+                }
+              }
+            }
+          }
+        )
+        |> render_change()
+      end
+
+      change.("true", "false")
+      change.("true", "true")
+
+      correct_input = fn index ->
+        ~s(input[type="checkbox"][name="quiz[quiz_questions][0][quiz_question_opts][#{index}][is_correct]"][checked])
+      end
+
+      refute has_element?(manage_live, correct_input.(0))
+      assert has_element?(manage_live, correct_input.(1))
+    end
 
     test "prompts to regenerate missing thumbnails and starts regeneration", %{
       conn: conn,

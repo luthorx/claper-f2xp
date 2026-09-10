@@ -3624,3 +3624,7 @@ msgstr "Atstājiet tukšu, lai notikums būtu pieejams uzreiz."
 #, elixir-autogen, elixir-format
 msgid "The presentation will appear here."
 msgstr "Prezentācija parādīsies šeit."
+
+#, elixir-autogen, elixir-format
+msgid "must have exactly one correct answer unless multiple answers are allowed"
+msgstr "jābūt tieši vienai pareizai atbildei, ja vairākas atbildes nav atļautas"

@@ -741,24 +741,26 @@ defmodule ClaperWeb.EventLive.Show do
     quiz_question_opt =
       Enum.find(current_quiz_question.quiz_question_opts, fn x -> x.id == opt end)
 
-    if Enum.any?(socket.assigns.selected_quiz_question_opts, fn x ->
-         x.id == quiz_question_opt.id
-       end) do
-      {:noreply,
-       socket
-       |> assign(
-         :selected_quiz_question_opts,
-         Enum.filter(socket.assigns.selected_quiz_question_opts, fn x ->
-           x.id != quiz_question_opt.id
-         end)
-       )}
-    else
-      {:noreply,
-       socket
-       |> assign(:selected_quiz_question_opts, [
-         quiz_question_opt | socket.assigns.selected_quiz_question_opts
-       ])}
-    end
+    selected = socket.assigns.selected_quiz_question_opts
+    already_selected? = Enum.any?(selected, &(&1.id == quiz_question_opt.id))
+
+    selected =
+      cond do
+        current_quiz_question.allow_multiple and already_selected? ->
+          Enum.reject(selected, &(&1.id == quiz_question_opt.id))
+
+        current_quiz_question.allow_multiple ->
+          [quiz_question_opt | selected]
+
+        # One answer per question: the new choice replaces the previous one
+        true ->
+          [
+            quiz_question_opt
+            | Enum.reject(selected, &(&1.quiz_question_id == current_quiz_question.id))
+          ]
+      end
+
+    {:noreply, assign(socket, :selected_quiz_question_opts, selected)}
   end
 
   @impl true

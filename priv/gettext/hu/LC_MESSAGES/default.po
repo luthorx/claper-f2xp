@@ -3620,3 +3620,7 @@ msgstr "Hagyja üresen, hogy az esemény azonnal elérhető legyen."
 #, elixir-autogen, elixir-format
 msgid "The presentation will appear here."
 msgstr "A prezentáció itt fog megjelenni."
+
+#, elixir-autogen, elixir-format
+msgid "must have exactly one correct answer unless multiple answers are allowed"
+msgstr "pontosan egy helyes válasz szükséges, ha a több válasz nem engedélyezett"

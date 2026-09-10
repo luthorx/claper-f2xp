@@ -230,5 +230,37 @@ defmodule Claper.QuizzesTest do
       assert {:ok, _updated_quiz} =
                Quizzes.submit_quiz(user, event_uuid, duplicate_opts, quiz.id)
     end
+
+    test "create_quiz/1 makes questions single-answer by default" do
+      quiz = quiz_fixture()
+      refute List.first(quiz.quiz_questions).allow_multiple
+    end
+
+    test "create_quiz/1 requires exactly one correct answer unless multiple answers are allowed" do
+      presentation_file = presentation_file_fixture()
+
+      attrs = fn allow_multiple ->
+        %{
+          title: "Test Quiz",
+          position: 1,
+          presentation_file_id: presentation_file.id,
+          quiz_questions: [
+            %{
+              content: "Pick the even numbers",
+              allow_multiple: allow_multiple,
+              quiz_question_opts: [
+                %{content: "2", is_correct: true},
+                %{content: "4", is_correct: true},
+                %{content: "5", is_correct: false}
+              ]
+            }
+          ]
+        }
+      end
+
+      assert {:error, %Ecto.Changeset{}} = Quizzes.create_quiz(attrs.(false))
+      assert {:ok, %Quiz{} = quiz} = Quizzes.create_quiz(attrs.(true))
+      assert List.first(quiz.quiz_questions).allow_multiple
+    end
   end
 end

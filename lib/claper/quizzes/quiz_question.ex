@@ -8,6 +8,7 @@ defmodule Claper.Quizzes.QuizQuestion do
           id: integer(),
           content: String.t(),
           type: String.t(),
+          allow_multiple: boolean(),
           quiz: Claper.Quizzes.Quiz.t() | nil,
           quiz_question_opts: [Claper.Quizzes.QuizQuestionOpt.t()] | nil,
           inserted_at: NaiveDateTime.t(),
@@ -17,6 +18,7 @@ defmodule Claper.Quizzes.QuizQuestion do
   schema "quiz_questions" do
     field :content, :string
     field :type, :string, default: "qcm"
+    field :allow_multiple, :boolean, default: false
 
     belongs_to :quiz, Claper.Quizzes.Quiz
 
@@ -30,7 +32,7 @@ defmodule Claper.Quizzes.QuizQuestion do
   @doc false
   def changeset(quiz_question, attrs) do
     quiz_question
-    |> cast(attrs, [:content, :type])
+    |> cast(attrs, [:content, :type, :allow_multiple])
     |> validate_required([:content, :type])
     |> cast_assoc(:quiz_question_opts,
       required: true,
@@ -39,6 +41,7 @@ defmodule Claper.Quizzes.QuizQuestion do
       drop_param: :quiz_question_opts_delete
     )
     |> validate_at_least_one_correct_opt()
+    |> validate_single_correct_opt()
   end
 
   defp validate_at_least_one_correct_opt(changeset) do
@@ -49,6 +52,22 @@ defmodule Claper.Quizzes.QuizQuestion do
       changeset
     else
       add_error(changeset, :quiz_question_opts, gettext("must have at least one correct answer"))
+    end
+  end
+
+  # Without multiple answers attendees pick one option, so only one can be correct
+  defp validate_single_correct_opt(changeset) do
+    correct_count =
+      (get_field(changeset, :quiz_question_opts) || []) |> Enum.count(& &1.is_correct)
+
+    if get_field(changeset, :allow_multiple) != true and correct_count > 1 do
+      add_error(
+        changeset,
+        :quiz_question_opts,
+        gettext("must have exactly one correct answer unless multiple answers are allowed")
+      )
+    else
+      changeset
     end
   end
 end

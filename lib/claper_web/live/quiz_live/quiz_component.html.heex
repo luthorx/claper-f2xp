@@ -84,6 +84,8 @@
               required
             />
 
+            <.checkbox form={q} key={:allow_multiple} label={gettext("Multiple answers")} />
+
             <%= if Keyword.has_key?(q.errors, :quiz_question_opts) do %>
               <p class="text-supporting-red-500 text-sm">
                 {elem(Keyword.get(q.errors, :quiz_question_opts), 0)}
