@@ -623,8 +623,10 @@ Hooks.AttendeeFocus = {
   },
   restoreCollapse() {
     const interactionMode = this.el.dataset.interactionMode === "true";
+    // With messages disabled the slide fills the room and can't be collapsed
+    const fill = this.el.dataset.focusFill === "true";
     const collapsed = localStorage.getItem(this.collapseKey) === "collapsed";
-    this.el.classList.toggle("focus-collapsed", collapsed && !interactionMode);
+    this.el.classList.toggle("focus-collapsed", collapsed && !interactionMode && !fill);
   },
   enterFullscreen() {
     if (!this.el.requestFullscreen) {

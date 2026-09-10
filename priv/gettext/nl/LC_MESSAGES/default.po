@@ -3618,3 +3618,7 @@ msgstr "Deze code wordt al gebruikt door een ander actief evenement: wijzig de c
 #, elixir-autogen, elixir-format
 msgid "Leave empty to make the event available right away."
 msgstr "Laat leeg om het evenement meteen beschikbaar te maken."
+
+#, elixir-autogen, elixir-format
+msgid "The presentation will appear here."
+msgstr "De presentatie verschijnt hier."

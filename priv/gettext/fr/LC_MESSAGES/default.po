@@ -3620,3 +3620,7 @@ msgstr "Ce code est déjà utilisé par un autre événement actif : modifiez-le
 #, elixir-autogen, elixir-format
 msgid "Leave empty to make the event available right away."
 msgstr "Laissez vide pour rendre l'événement disponible immédiatement."
+
+#, elixir-autogen, elixir-format
+msgid "The presentation will appear here."
+msgstr "La présentation apparaîtra ici."

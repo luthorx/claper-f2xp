@@ -13,15 +13,22 @@
   <% captions_visible? =
     @transcription_config && @transcription_config.enabled &&
       @transcription_config.visibility in ["both", "attendee"] %>
+  <%!-- With messages disabled the chat area is removed and the slide or interaction fills the room --%>
+  <% focus_fill? = focus_content? && !@state.chat_enabled %>
+  <% grid_rows =
+    cond do
+      focus_fill? && captions_visible? -> "grid-rows-[auto_minmax(0,1fr)_auto]"
+      focus_fill? -> "grid-rows-[auto_minmax(0,1fr)]"
+      focus_content? && captions_visible? -> "grid-rows-[auto_auto_auto_minmax(0,1fr)]"
+      focus_content? || captions_visible? -> "grid-rows-[auto_auto_minmax(0,1fr)]"
+      true -> "grid-rows-[auto_minmax(0,1fr)]"
+    end %>
   <div class="h-[100dvh] overflow-hidden bg-black lg:bg-primary-700">
     <main
       id="attendee-room"
       class={[
         "relative mx-auto grid h-[100dvh] w-full max-w-lg overflow-hidden bg-black font-display shadow-2xl",
-        focus_content? && captions_visible? &&
-          "grid-rows-[auto_auto_auto_minmax(0,1fr)]",
-        focus_content? != captions_visible? && "grid-rows-[auto_auto_minmax(0,1fr)]",
-        !focus_content? && !captions_visible? && "grid-rows-[auto_minmax(0,1fr)]"
+        grid_rows
       ]}
     >
       <div
@@ -140,10 +147,12 @@
         data-focus-key={focus_key(@current_interaction, @state.position)}
         data-collapse-key={"focus-slot:#{@event.uuid}"}
         data-interaction-mode={to_string(interaction_mode?)}
+        data-focus-fill={to_string(focus_fill?)}
         class={[
           "relative z-10 min-h-0 overflow-hidden border-y border-white/10 bg-gray-950 transition-[height] duration-300",
-          interaction_mode? && "h-auto max-h-[40dvh]",
-          !interaction_mode? && "h-[40dvh] min-h-40 max-h-[26rem]"
+          focus_fill? && "h-full",
+          !focus_fill? && interaction_mode? && "h-auto max-h-[40dvh]",
+          !focus_fill? && !interaction_mode? && "h-[40dvh] min-h-40 max-h-[26rem]"
         ]}
       >
         <div
@@ -155,7 +164,11 @@
 
         <%= case @current_interaction do %>
           <% %Claper.Polls.Poll{} -> %>
-            <div class="max-h-[40dvh] overflow-y-auto overscroll-contain p-3">
+            <div class={[
+              "overflow-y-auto overscroll-contain p-3",
+              if(focus_fill?, do: "h-full", else: "max-h-[40dvh]"),
+              focus_fill? && @state.message_reaction_enabled && "pb-24"
+            ]}>
               <.live_component
                 module={ClaperWeb.EventLive.PollComponent}
                 id={"#{@current_interaction.id}-poll"}
@@ -170,7 +183,11 @@
               />
             </div>
           <% %Claper.Forms.Form{} -> %>
-            <div class="max-h-[40dvh] overflow-y-auto overscroll-contain p-3">
+            <div class={[
+              "overflow-y-auto overscroll-contain p-3",
+              if(focus_fill?, do: "h-full", else: "max-h-[40dvh]"),
+              focus_fill? && @state.message_reaction_enabled && "pb-24"
+            ]}>
               <.live_component
                 module={ClaperWeb.EventLive.FormComponent}
                 id={"#{@current_interaction.id}-form"}
@@ -183,7 +200,11 @@
               />
             </div>
           <% %Claper.Quizzes.Quiz{} -> %>
-            <div class="max-h-[40dvh] overflow-y-auto overscroll-contain p-3">
+            <div class={[
+              "overflow-y-auto overscroll-contain p-3",
+              if(focus_fill?, do: "h-full", else: "max-h-[40dvh]"),
+              focus_fill? && @state.message_reaction_enabled && "pb-24"
+            ]}>
               <.live_component
                 module={ClaperWeb.EventLive.QuizComponent}
                 id={"#{@current_interaction.id}-quiz"}
@@ -199,7 +220,11 @@
               />
             </div>
           <% %Claper.Embeds.Embed{attendee_visibility: true} -> %>
-            <div class="max-h-[40dvh] overflow-y-auto overscroll-contain p-3">
+            <div class={[
+              "overflow-y-auto overscroll-contain p-3",
+              if(focus_fill?, do: "h-full", else: "max-h-[40dvh]"),
+              focus_fill? && @state.message_reaction_enabled && "pb-24"
+            ]}>
               <.live_component
                 id={"#{@current_interaction.id}-embed"}
                 module={ClaperWeb.EventLive.EmbedComponent}
@@ -240,7 +265,7 @@
         </button>
 
         <button
-          :if={focus_content? && !interaction_mode?}
+          :if={focus_content? && !interaction_mode? && !focus_fill?}
           type="button"
           data-focus-collapse
           aria-label={gettext("Hide presentation")}
@@ -258,7 +283,7 @@
         </button>
 
         <div
-          :if={focus_content? && !interaction_mode?}
+          :if={focus_content? && !interaction_mode? && !focus_fill?}
           data-focus-collapsed-bar
           class="hidden h-full items-center px-4"
         >
@@ -343,11 +368,19 @@
         </div>
       </section>
 
-      <section id="chat-panel" class="relative min-h-0 overflow-visible bg-black">
+      <section
+        id="chat-panel"
+        class={[
+          "min-h-0 overflow-visible",
+          @state.chat_enabled && "relative bg-black",
+          !@state.chat_enabled && "pointer-events-none absolute inset-0 z-20"
+        ]}
+      >
         <div
           id="chat-feed"
           class={[
             "h-full space-y-3 overflow-y-auto overscroll-contain px-4 pt-4",
+            !@state.chat_enabled && "hidden",
             @state.message_reaction_enabled && "pb-40",
             !@state.message_reaction_enabled && "pb-24"
           ]}
@@ -381,6 +414,14 @@
           {gettext("Be the first to ask a question or share a thought.")}
         </div>
 
+        <div
+          :if={!@state.chat_enabled && !focus_content?}
+          id="focus-placeholder"
+          class="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-gray-500"
+        >
+          {gettext("The presentation will appear here.")}
+        </div>
+
         <button
           id="new-messages-chip"
           type="button"
@@ -402,7 +443,11 @@
           :if={@state.message_reaction_enabled}
           id="room-reaction-fab"
           phx-hook="RoomReactionFab"
-          class="absolute bottom-20 left-4 z-20 flex w-14 flex-col items-center gap-2"
+          class={[
+            "absolute left-4 z-20 flex w-14 flex-col items-center gap-2",
+            @state.chat_enabled && "bottom-20",
+            !@state.chat_enabled && "pointer-events-auto bottom-4"
+          ]}
         >
           <div
             data-reaction-picker
@@ -481,59 +526,54 @@
       </section>
 
       <footer
+        :if={@state.chat_enabled}
         id="room-composer"
         class="absolute inset-x-0 bottom-0 z-30 bg-transparent px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2"
       >
-        <%= if @state.chat_enabled do %>
-          <.form
-            :let={f}
-            for={@post_changeset}
-            id="post-form"
-            class="attendee-composer flex items-center gap-1.5 rounded-2xl border border-white/20 px-1.5 py-1 shadow-2xl"
-            phx-hook="PostForm"
-            data-nickname={@nickname}
-            data-storage-key={"post-draft:#{@event.uuid}"}
-            phx-submit="save"
+        <.form
+          :let={f}
+          for={@post_changeset}
+          id="post-form"
+          class="attendee-composer flex items-center gap-1.5 rounded-2xl border border-white/20 px-1.5 py-1 shadow-2xl"
+          phx-hook="PostForm"
+          data-nickname={@nickname}
+          data-storage-key={"post-draft:#{@event.uuid}"}
+          phx-submit="save"
+        >
+          <button
+            id="composer-identity-button"
+            type="button"
+            aria-label={gettext("Choose identity")}
+            phx-click={JS.toggle(to: "#identity-menu")}
+            class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/60 text-xs font-bold text-white"
           >
-            <button
-              id="composer-identity-button"
-              type="button"
-              aria-label={gettext("Choose identity")}
-              phx-click={JS.toggle(to: "#identity-menu")}
-              class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/60 text-xs font-bold text-white"
-            >
-              {if @nickname in [nil, ""], do: "A", else: String.first(@nickname)}
-            </button>
+            {if @nickname in [nil, ""], do: "A", else: String.first(@nickname)}
+          </button>
 
-            {textarea(f, :body,
-              id: "postFormTA",
-              disabled: !@state.anonymous_chat_enabled && @nickname in [nil, ""],
-              rows: 1,
-              maxlength: 255,
-              class:
-                "min-h-9 max-h-16 min-w-0 flex-1 resize-none border-0 bg-transparent px-2 py-2 text-base leading-5 text-white outline-hidden placeholder:text-white/70 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
-              placeholder:
-                if(!@state.anonymous_chat_enabled && @nickname in [nil, ""],
-                  do: gettext("Set your nickname to participate"),
-                  else: gettext("Ask, comment...")
-                )
-            )}
+          {textarea(f, :body,
+            id: "postFormTA",
+            disabled: !@state.anonymous_chat_enabled && @nickname in [nil, ""],
+            rows: 1,
+            maxlength: 255,
+            class:
+              "min-h-9 max-h-16 min-w-0 flex-1 resize-none border-0 bg-transparent px-2 py-2 text-base leading-5 text-white outline-hidden placeholder:text-white/70 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
+            placeholder:
+              if(!@state.anonymous_chat_enabled && @nickname in [nil, ""],
+                do: gettext("Set your nickname to participate"),
+                else: gettext("Ask, comment...")
+              )
+          )}
 
-            <button
-              type="submit"
-              id="submitBtn"
-              disabled
-              aria-label={gettext("Send message")}
-              class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/20 text-white opacity-50 transition disabled:cursor-not-allowed"
-            >
-              <img src="/images/icons/send.svg" class="h-5 w-5" />
-            </button>
-          </.form>
-        <% else %>
-          <div class="attendee-composer flex min-h-10 items-center rounded-2xl border border-white/20 px-3 text-sm text-white/60 shadow-2xl">
-            {gettext("Messages deactivated")}
-          </div>
-        <% end %>
+          <button
+            type="submit"
+            id="submitBtn"
+            disabled
+            aria-label={gettext("Send message")}
+            class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/20 text-white opacity-50 transition disabled:cursor-not-allowed"
+          >
+            <img src="/images/icons/send.svg" class="h-5 w-5" />
+          </button>
+        </.form>
       </footer>
     </main>
   </div>

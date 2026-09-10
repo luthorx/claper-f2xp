@@ -3616,3 +3616,7 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Leave empty to make the event available right away."
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The presentation will appear here."
+msgstr ""

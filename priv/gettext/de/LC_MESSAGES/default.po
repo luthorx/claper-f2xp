@@ -3616,3 +3616,7 @@ msgstr "Dieser Code wird bereits von einer anderen aktiven Veranstaltung verwend
 #, elixir-autogen, elixir-format
 msgid "Leave empty to make the event available right away."
 msgstr "Leer lassen, um die Veranstaltung sofort verfügbar zu machen."
+
+#, elixir-autogen, elixir-format
+msgid "The presentation will appear here."
+msgstr "Die Präsentation erscheint hier."

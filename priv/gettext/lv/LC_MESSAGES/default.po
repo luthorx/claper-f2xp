@@ -3620,3 +3620,7 @@ msgstr "Šo kodu jau izmanto cits aktīvs notikums: nomainiet to un pēc tam atk
 #, elixir-autogen, elixir-format
 msgid "Leave empty to make the event available right away."
 msgstr "Atstājiet tukšu, lai notikums būtu pieejams uzreiz."
+
+#, elixir-autogen, elixir-format
+msgid "The presentation will appear here."
+msgstr "Prezentācija parādīsies šeit."

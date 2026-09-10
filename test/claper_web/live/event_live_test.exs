@@ -209,6 +209,13 @@ defmodule ClaperWeb.EventLiveTest do
     end
   end
 
+  defp set_chat_enabled(presentation_file, enabled) do
+    Claper.Presentations.PresentationState
+    |> Claper.Repo.get_by!(presentation_file_id: presentation_file.id)
+    |> Ecto.Changeset.change(chat_enabled: enabled)
+    |> Claper.Repo.update!()
+  end
+
   describe "Show" do
     setup [:register_and_log_in_user, :create_event]
 
@@ -220,6 +227,49 @@ defmodule ClaperWeb.EventLiveTest do
       assert html =~ presentation_file.event.name
     end
 
+    test "keeps the message area next to the slide when messages are enabled", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+
+      assert has_element?(show_live, "#post-form")
+      assert has_element?(show_live, ~s(#focus-slot[data-focus-fill="false"]))
+      assert has_element?(show_live, "[data-focus-collapse]")
+    end
+
+    test "fills the room with the slide when messages are disabled", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      set_chat_enabled(presentation_file, false)
+
+      {:ok, show_live, html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+
+      assert has_element?(show_live, ~s(#focus-slot[data-focus-fill="true"]))
+      assert has_element?(show_live, "#chat-feed.hidden")
+      refute has_element?(show_live, "#room-composer")
+      refute has_element?(show_live, "[data-focus-collapse]")
+      refute html =~ "Messages deactivated"
+    end
+
+    test "switches layout live when the presenter toggles messages", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+      assert has_element?(show_live, "#post-form")
+
+      send(show_live.pid, {:state_updated, set_chat_enabled(presentation_file, false)})
+
+      assert has_element?(show_live, ~s(#focus-slot[data-focus-fill="true"]))
+      refute has_element?(show_live, "#room-composer")
+
+      send(show_live.pid, {:state_updated, set_chat_enabled(presentation_file, true)})
+
+      assert has_element?(show_live, "#post-form")
+      assert has_element?(show_live, ~s(#focus-slot[data-focus-fill="false"]))
+    end
   end
 
   describe "Manage" do

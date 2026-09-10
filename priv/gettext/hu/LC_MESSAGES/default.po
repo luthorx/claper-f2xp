@@ -3616,3 +3616,7 @@ msgstr "Ezt a kódot már egy másik aktív esemény használja: módosítsa, ma
 #, elixir-autogen, elixir-format
 msgid "Leave empty to make the event available right away."
 msgstr "Hagyja üresen, hogy az esemény azonnal elérhető legyen."
+
+#, elixir-autogen, elixir-format
+msgid "The presentation will appear here."
+msgstr "A prezentáció itt fog megjelenni."
