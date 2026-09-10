@@ -3624,3 +3624,299 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "must have exactly one correct answer unless multiple answers are allowed"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "%{selected} of %{total} selected"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Alps"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Answer %{number}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Answers: at least two. Add more columns to the right if you need more answers."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Check the file"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Choose a file or drop it here"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Choose a file to import."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Choose another file"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Correct answers"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Correct answers: the numbers of the correct answers, separated by a semicolon (for example 1;3). Quizzes only."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Could be better"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Deselect all"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Download the template"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Excellent"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "From a file"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "From an event"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Geography quiz"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Good"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "How would you rate this session?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Import"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Import interactions"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Import quizzes and polls from an Excel (.xlsx) or CSV file, one row for each quiz question or poll."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Import selected interactions"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Instructions"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Interactions are added to slide %{number} and stay disabled until you activate them."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Interactions imported: %{count}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Interactions keep the slides of the original event and stay disabled until you activate them."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Keep the slides of the original event"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Milan"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Multiple answers: %{yes} lets attendees choose several answers, %{no} only one. When empty, several answers are allowed only if more than one answer is correct."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "NO"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Naples"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Options: %{count}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Other events"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Po"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Question"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Question: the quiz question. Leave it empty for polls."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Questions: %{count}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Ready to import:"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Remove"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Reuse interactions from another event or a spreadsheet."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Rome"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Row %{row}: %{message}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Save the file as .xlsx or .csv. Imported interactions are added to the current slide and stay disabled until you activate them."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Search an event"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Select all"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Select at least one interaction to import."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Slide %{number}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The file contains no quizzes or polls."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The file could not be read. Start from the template and save it as .xlsx or .csv."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The file could not be uploaded."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The file has too many rows (maximum %{max})."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The file is too large (max 2 MB)."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The interactions could not be imported."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "This event has no interactions."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Tiber"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Title: the quiz title or the poll question. Consecutive QUIZ rows with the same title, or with no title, belong to the same quiz."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Type: QUIZ or POLL."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Unsupported file: use an .xlsx or .csv file."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "What is the capital of Italy?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Which of these are rivers?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Write one row for each quiz question or poll, keeping the columns in the order of the \"%{sheet}\" sheet. The header row is optional."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "YES"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "You have no other events to import from."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "at least two answers are required"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "multiple answers must be YES or NO"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "only one correct answer is allowed when multiple answers is NO"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "texts can be at most %{max} characters long"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "the correct answers are missing"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "the correct answers must be answer numbers, e.g. 1 or 1;3"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "the question is missing"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "the title is missing"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "unknown type \"%{type}\", use QUIZ or POLL"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "…and %{count} more"
+msgstr ""

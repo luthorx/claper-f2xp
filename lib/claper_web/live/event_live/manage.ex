@@ -411,6 +411,19 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   @impl true
+  def handle_info({:interactions_imported, _interactions}, socket) do
+    {:noreply, socket |> interactions_at_position(socket.assigns.state.position)}
+  end
+
+  @impl true
+  def handle_info({:import_completed, count}, socket) do
+    {:noreply,
+     socket
+     |> put_flash(:info, gettext("Interactions imported: %{count}", count: count))
+     |> push_navigate(to: ~p"/e/#{socket.assigns.event.code}/manage")}
+  end
+
+  @impl true
   def handle_info(_, socket) do
     {:noreply, socket}
   end
@@ -1174,7 +1187,7 @@ defmodule ClaperWeb.EventLive.Manage do
   defp apply_action(socket, :import, _params) do
     socket
     |> assign(:create, "import")
-    |> assign(:events, Claper.Events.list_events(socket.assigns.current_user.id))
+    |> assign(:interaction_modal, true)
   end
 
   defp apply_action(socket, :edit_form, %{"id" => id}) do

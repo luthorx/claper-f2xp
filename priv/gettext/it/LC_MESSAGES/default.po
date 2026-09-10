@@ -3625,3 +3625,299 @@ msgstr "La presentazione apparirà qui."
 #, elixir-autogen, elixir-format
 msgid "must have exactly one correct answer unless multiple answers are allowed"
 msgstr "deve avere una sola risposta corretta se le risposte multiple non sono consentite"
+
+#, elixir-autogen, elixir-format
+msgid "%{selected} of %{total} selected"
+msgstr "%{selected} di %{total} selezionate"
+
+#, elixir-autogen, elixir-format
+msgid "Alps"
+msgstr "Alpi"
+
+#, elixir-autogen, elixir-format
+msgid "Answer %{number}"
+msgstr "Risposta %{number}"
+
+#, elixir-autogen, elixir-format
+msgid "Answers: at least two. Add more columns to the right if you need more answers."
+msgstr "Risposte: almeno due. Aggiungi altre colonne a destra se ti servono più risposte."
+
+#, elixir-autogen, elixir-format
+msgid "Check the file"
+msgstr "Controlla il file"
+
+#, elixir-autogen, elixir-format
+msgid "Choose a file or drop it here"
+msgstr "Scegli un file o trascinalo qui"
+
+#, elixir-autogen, elixir-format
+msgid "Choose a file to import."
+msgstr "Scegli un file da importare."
+
+#, elixir-autogen, elixir-format
+msgid "Choose another file"
+msgstr "Scegli un altro file"
+
+#, elixir-autogen, elixir-format
+msgid "Correct answers"
+msgstr "Risposte corrette"
+
+#, elixir-autogen, elixir-format
+msgid "Correct answers: the numbers of the correct answers, separated by a semicolon (for example 1;3). Quizzes only."
+msgstr "Risposte corrette: i numeri delle risposte corrette, separati da punto e virgola (ad esempio 1;3). Solo per i quiz."
+
+#, elixir-autogen, elixir-format
+msgid "Could be better"
+msgstr "Si può migliorare"
+
+#, elixir-autogen, elixir-format
+msgid "Deselect all"
+msgstr "Deseleziona tutto"
+
+#, elixir-autogen, elixir-format
+msgid "Download the template"
+msgstr "Scarica il modello"
+
+#, elixir-autogen, elixir-format
+msgid "Excellent"
+msgstr "Ottima"
+
+#, elixir-autogen, elixir-format
+msgid "From a file"
+msgstr "Da un file"
+
+#, elixir-autogen, elixir-format
+msgid "From an event"
+msgstr "Da un evento"
+
+#, elixir-autogen, elixir-format
+msgid "Geography quiz"
+msgstr "Quiz di geografia"
+
+#, elixir-autogen, elixir-format
+msgid "Good"
+msgstr "Buona"
+
+#, elixir-autogen, elixir-format
+msgid "How would you rate this session?"
+msgstr "Come valuti questa sessione?"
+
+#, elixir-autogen, elixir-format
+msgid "Import"
+msgstr "Importa"
+
+#, elixir-autogen, elixir-format
+msgid "Import interactions"
+msgstr "Importa interazioni"
+
+#, elixir-autogen, elixir-format
+msgid "Import quizzes and polls from an Excel (.xlsx) or CSV file, one row for each quiz question or poll."
+msgstr "Importa quiz e sondaggi da un file Excel (.xlsx) o CSV, una riga per ogni domanda del quiz o sondaggio."
+
+#, elixir-autogen, elixir-format
+msgid "Import selected interactions"
+msgstr "Importa le interazioni selezionate"
+
+#, elixir-autogen, elixir-format
+msgid "Instructions"
+msgstr "Istruzioni"
+
+#, elixir-autogen, elixir-format
+msgid "Interactions are added to slide %{number} and stay disabled until you activate them."
+msgstr "Le interazioni vengono aggiunte alla slide %{number} e restano disattivate finché non le attivi."
+
+#, elixir-autogen, elixir-format
+msgid "Interactions imported: %{count}"
+msgstr "Interazioni importate: %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "Interactions keep the slides of the original event and stay disabled until you activate them."
+msgstr "Le interazioni mantengono le slide dell'evento originale e restano disattivate finché non le attivi."
+
+#, elixir-autogen, elixir-format
+msgid "Keep the slides of the original event"
+msgstr "Mantieni le slide dell'evento originale"
+
+#, elixir-autogen, elixir-format
+msgid "Milan"
+msgstr "Milano"
+
+#, elixir-autogen, elixir-format
+msgid "Multiple answers: %{yes} lets attendees choose several answers, %{no} only one. When empty, several answers are allowed only if more than one answer is correct."
+msgstr "Risposte multiple: %{yes} permette ai partecipanti di scegliere più risposte, %{no} una sola. Se vuoto, più risposte sono consentite solo se più di una risposta è corretta."
+
+#, elixir-autogen, elixir-format
+msgid "NO"
+msgstr "NO"
+
+#, elixir-autogen, elixir-format
+msgid "Naples"
+msgstr "Napoli"
+
+#, elixir-autogen, elixir-format
+msgid "Options: %{count}"
+msgstr "Opzioni: %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "Other events"
+msgstr "Altri eventi"
+
+#, elixir-autogen, elixir-format
+msgid "Po"
+msgstr "Po"
+
+#, elixir-autogen, elixir-format
+msgid "Question"
+msgstr "Domanda"
+
+#, elixir-autogen, elixir-format
+msgid "Question: the quiz question. Leave it empty for polls."
+msgstr "Domanda: la domanda del quiz. Lasciala vuota per i sondaggi."
+
+#, elixir-autogen, elixir-format
+msgid "Questions: %{count}"
+msgstr "Domande: %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "Ready to import:"
+msgstr "Pronto da importare:"
+
+#, elixir-autogen, elixir-format
+msgid "Remove"
+msgstr "Rimuovi"
+
+#, elixir-autogen, elixir-format
+msgid "Reuse interactions from another event or a spreadsheet."
+msgstr "Riutilizza le interazioni di un altro evento o di un foglio di calcolo."
+
+#, elixir-autogen, elixir-format
+msgid "Rome"
+msgstr "Roma"
+
+#, elixir-autogen, elixir-format
+msgid "Row %{row}: %{message}"
+msgstr "Riga %{row}: %{message}"
+
+#, elixir-autogen, elixir-format
+msgid "Save the file as .xlsx or .csv. Imported interactions are added to the current slide and stay disabled until you activate them."
+msgstr "Salva il file come .xlsx o .csv. Le interazioni importate vengono aggiunte alla slide corrente e restano disattivate finché non le attivi."
+
+#, elixir-autogen, elixir-format
+msgid "Search an event"
+msgstr "Cerca un evento"
+
+#, elixir-autogen, elixir-format
+msgid "Select all"
+msgstr "Seleziona tutto"
+
+#, elixir-autogen, elixir-format
+msgid "Select at least one interaction to import."
+msgstr "Seleziona almeno un'interazione da importare."
+
+#, elixir-autogen, elixir-format
+msgid "Slide %{number}"
+msgstr "Slide %{number}"
+
+#, elixir-autogen, elixir-format
+msgid "The file contains no quizzes or polls."
+msgstr "Il file non contiene quiz né sondaggi."
+
+#, elixir-autogen, elixir-format
+msgid "The file could not be read. Start from the template and save it as .xlsx or .csv."
+msgstr "Impossibile leggere il file. Parti dal modello e salvalo come .xlsx o .csv."
+
+#, elixir-autogen, elixir-format
+msgid "The file could not be uploaded."
+msgstr "Impossibile caricare il file."
+
+#, elixir-autogen, elixir-format
+msgid "The file has too many rows (maximum %{max})."
+msgstr "Il file ha troppe righe (massimo %{max})."
+
+#, elixir-autogen, elixir-format
+msgid "The file is too large (max 2 MB)."
+msgstr "Il file è troppo grande (massimo 2 MB)."
+
+#, elixir-autogen, elixir-format
+msgid "The interactions could not be imported."
+msgstr "Impossibile importare le interazioni."
+
+#, elixir-autogen, elixir-format
+msgid "This event has no interactions."
+msgstr "Questo evento non ha interazioni."
+
+#, elixir-autogen, elixir-format
+msgid "Tiber"
+msgstr "Tevere"
+
+#, elixir-autogen, elixir-format
+msgid "Title: the quiz title or the poll question. Consecutive QUIZ rows with the same title, or with no title, belong to the same quiz."
+msgstr "Titolo: il titolo del quiz o la domanda del sondaggio. Le righe QUIZ consecutive con lo stesso titolo, o senza titolo, appartengono allo stesso quiz."
+
+#, elixir-autogen, elixir-format
+msgid "Type: QUIZ or POLL."
+msgstr "Tipo: QUIZ o POLL."
+
+#, elixir-autogen, elixir-format
+msgid "Unsupported file: use an .xlsx or .csv file."
+msgstr "File non supportato: usa un file .xlsx o .csv."
+
+#, elixir-autogen, elixir-format
+msgid "What is the capital of Italy?"
+msgstr "Qual è la capitale d'Italia?"
+
+#, elixir-autogen, elixir-format
+msgid "Which of these are rivers?"
+msgstr "Quali di questi sono fiumi?"
+
+#, elixir-autogen, elixir-format
+msgid "Write one row for each quiz question or poll, keeping the columns in the order of the \"%{sheet}\" sheet. The header row is optional."
+msgstr "Scrivi una riga per ogni domanda del quiz o sondaggio, mantenendo le colonne nell'ordine del foglio \"%{sheet}\". La riga di intestazione è facoltativa."
+
+#, elixir-autogen, elixir-format
+msgid "YES"
+msgstr "SÌ"
+
+#, elixir-autogen, elixir-format
+msgid "You have no other events to import from."
+msgstr "Non hai altri eventi da cui importare."
+
+#, elixir-autogen, elixir-format
+msgid "at least two answers are required"
+msgstr "servono almeno due risposte"
+
+#, elixir-autogen, elixir-format
+msgid "multiple answers must be YES or NO"
+msgstr "risposte multiple deve essere SÌ o NO"
+
+#, elixir-autogen, elixir-format
+msgid "only one correct answer is allowed when multiple answers is NO"
+msgstr "è consentita una sola risposta corretta quando risposte multiple è NO"
+
+#, elixir-autogen, elixir-format
+msgid "texts can be at most %{max} characters long"
+msgstr "i testi possono avere al massimo %{max} caratteri"
+
+#, elixir-autogen, elixir-format
+msgid "the correct answers are missing"
+msgstr "mancano le risposte corrette"
+
+#, elixir-autogen, elixir-format
+msgid "the correct answers must be answer numbers, e.g. 1 or 1;3"
+msgstr "le risposte corrette devono essere numeri di risposta, ad es. 1 o 1;3"
+
+#, elixir-autogen, elixir-format
+msgid "the question is missing"
+msgstr "manca la domanda"
+
+#, elixir-autogen, elixir-format
+msgid "the title is missing"
+msgstr "manca il titolo"
+
+#, elixir-autogen, elixir-format
+msgid "unknown type \"%{type}\", use QUIZ or POLL"
+msgstr "tipo \"%{type}\" sconosciuto, usa QUIZ o POLL"
+
+#, elixir-autogen, elixir-format
+msgid "…and %{count} more"
+msgstr "…e altri %{count}"

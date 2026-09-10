@@ -3624,3 +3624,299 @@ msgstr "A prezentáció itt fog megjelenni."
 #, elixir-autogen, elixir-format
 msgid "must have exactly one correct answer unless multiple answers are allowed"
 msgstr "pontosan egy helyes válasz szükséges, ha a több válasz nem engedélyezett"
+
+#, elixir-autogen, elixir-format
+msgid "%{selected} of %{total} selected"
+msgstr "%{selected} / %{total} kiválasztva"
+
+#, elixir-autogen, elixir-format
+msgid "Alps"
+msgstr "Alpok"
+
+#, elixir-autogen, elixir-format
+msgid "Answer %{number}"
+msgstr "%{number}. válasz"
+
+#, elixir-autogen, elixir-format
+msgid "Answers: at least two. Add more columns to the right if you need more answers."
+msgstr "Válaszok: legalább kettő. Ha több válaszra van szüksége, adjon hozzá oszlopokat jobbra."
+
+#, elixir-autogen, elixir-format
+msgid "Check the file"
+msgstr "Fájl ellenőrzése"
+
+#, elixir-autogen, elixir-format
+msgid "Choose a file or drop it here"
+msgstr "Válasszon fájlt, vagy húzza ide"
+
+#, elixir-autogen, elixir-format
+msgid "Choose a file to import."
+msgstr "Válassza ki az importálandó fájlt."
+
+#, elixir-autogen, elixir-format
+msgid "Choose another file"
+msgstr "Másik fájl választása"
+
+#, elixir-autogen, elixir-format
+msgid "Correct answers"
+msgstr "Helyes válaszok"
+
+#, elixir-autogen, elixir-format
+msgid "Correct answers: the numbers of the correct answers, separated by a semicolon (for example 1;3). Quizzes only."
+msgstr "Helyes válaszok: a helyes válaszok sorszámai pontosvesszővel elválasztva (például 1;3). Csak kvízekhez."
+
+#, elixir-autogen, elixir-format
+msgid "Could be better"
+msgstr "Lehetne jobb"
+
+#, elixir-autogen, elixir-format
+msgid "Deselect all"
+msgstr "Kijelölés megszüntetése"
+
+#, elixir-autogen, elixir-format
+msgid "Download the template"
+msgstr "Sablon letöltése"
+
+#, elixir-autogen, elixir-format
+msgid "Excellent"
+msgstr "Kiváló"
+
+#, elixir-autogen, elixir-format
+msgid "From a file"
+msgstr "Fájlból"
+
+#, elixir-autogen, elixir-format
+msgid "From an event"
+msgstr "Eseményből"
+
+#, elixir-autogen, elixir-format
+msgid "Geography quiz"
+msgstr "Földrajzkvíz"
+
+#, elixir-autogen, elixir-format
+msgid "Good"
+msgstr "Jó"
+
+#, elixir-autogen, elixir-format
+msgid "How would you rate this session?"
+msgstr "Hogyan értékelné ezt az alkalmat?"
+
+#, elixir-autogen, elixir-format
+msgid "Import"
+msgstr "Importálás"
+
+#, elixir-autogen, elixir-format
+msgid "Import interactions"
+msgstr "Interakciók importálása"
+
+#, elixir-autogen, elixir-format
+msgid "Import quizzes and polls from an Excel (.xlsx) or CSV file, one row for each quiz question or poll."
+msgstr "Kvízek és szavazások importálása Excel (.xlsx) vagy CSV fájlból, kvízkérdésenként vagy szavazásonként egy sorral."
+
+#, elixir-autogen, elixir-format
+msgid "Import selected interactions"
+msgstr "Kijelölt interakciók importálása"
+
+#, elixir-autogen, elixir-format
+msgid "Instructions"
+msgstr "Útmutató"
+
+#, elixir-autogen, elixir-format
+msgid "Interactions are added to slide %{number} and stay disabled until you activate them."
+msgstr "Az interakciók a(z) %{number}. diára kerülnek, és kikapcsolva maradnak, amíg be nem kapcsolja őket."
+
+#, elixir-autogen, elixir-format
+msgid "Interactions imported: %{count}"
+msgstr "Importált interakciók: %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "Interactions keep the slides of the original event and stay disabled until you activate them."
+msgstr "Az interakciók megtartják az eredeti esemény diáit, és kikapcsolva maradnak, amíg be nem kapcsolja őket."
+
+#, elixir-autogen, elixir-format
+msgid "Keep the slides of the original event"
+msgstr "Az eredeti esemény diáinak megtartása"
+
+#, elixir-autogen, elixir-format
+msgid "Milan"
+msgstr "Milánó"
+
+#, elixir-autogen, elixir-format
+msgid "Multiple answers: %{yes} lets attendees choose several answers, %{no} only one. When empty, several answers are allowed only if more than one answer is correct."
+msgstr "Több válaszlehetőség: %{yes} esetén a résztvevők több választ is választhatnak, %{no} esetén csak egyet. Ha üres, több válasz csak akkor engedélyezett, ha több helyes válasz van."
+
+#, elixir-autogen, elixir-format
+msgid "NO"
+msgstr "NEM"
+
+#, elixir-autogen, elixir-format
+msgid "Naples"
+msgstr "Nápoly"
+
+#, elixir-autogen, elixir-format
+msgid "Options: %{count}"
+msgstr "Lehetőségek: %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "Other events"
+msgstr "Más események"
+
+#, elixir-autogen, elixir-format
+msgid "Po"
+msgstr "Pó"
+
+#, elixir-autogen, elixir-format
+msgid "Question"
+msgstr "Kérdés"
+
+#, elixir-autogen, elixir-format
+msgid "Question: the quiz question. Leave it empty for polls."
+msgstr "Kérdés: a kvízkérdés. Szavazásoknál hagyja üresen."
+
+#, elixir-autogen, elixir-format
+msgid "Questions: %{count}"
+msgstr "Kérdések: %{count}"
+
+#, elixir-autogen, elixir-format
+msgid "Ready to import:"
+msgstr "Importálásra kész:"
+
+#, elixir-autogen, elixir-format
+msgid "Remove"
+msgstr "Eltávolítás"
+
+#, elixir-autogen, elixir-format
+msgid "Reuse interactions from another event or a spreadsheet."
+msgstr "Interakciók újrafelhasználása egy másik eseményből vagy táblázatból."
+
+#, elixir-autogen, elixir-format
+msgid "Rome"
+msgstr "Róma"
+
+#, elixir-autogen, elixir-format
+msgid "Row %{row}: %{message}"
+msgstr "%{row}. sor: %{message}"
+
+#, elixir-autogen, elixir-format
+msgid "Save the file as .xlsx or .csv. Imported interactions are added to the current slide and stay disabled until you activate them."
+msgstr "Mentse a fájlt .xlsx vagy .csv formátumban. Az importált interakciók az aktuális diára kerülnek, és kikapcsolva maradnak, amíg be nem kapcsolja őket."
+
+#, elixir-autogen, elixir-format
+msgid "Search an event"
+msgstr "Esemény keresése"
+
+#, elixir-autogen, elixir-format
+msgid "Select all"
+msgstr "Összes kijelölése"
+
+#, elixir-autogen, elixir-format
+msgid "Select at least one interaction to import."
+msgstr "Válasszon ki legalább egy importálandó interakciót."
+
+#, elixir-autogen, elixir-format
+msgid "Slide %{number}"
+msgstr "%{number}. dia"
+
+#, elixir-autogen, elixir-format
+msgid "The file contains no quizzes or polls."
+msgstr "A fájl nem tartalmaz kvízt vagy szavazást."
+
+#, elixir-autogen, elixir-format
+msgid "The file could not be read. Start from the template and save it as .xlsx or .csv."
+msgstr "A fájlt nem sikerült beolvasni. Induljon ki a sablonból, és mentse .xlsx vagy .csv formátumban."
+
+#, elixir-autogen, elixir-format
+msgid "The file could not be uploaded."
+msgstr "A fájlt nem sikerült feltölteni."
+
+#, elixir-autogen, elixir-format
+msgid "The file has too many rows (maximum %{max})."
+msgstr "A fájl túl sok sort tartalmaz (legfeljebb %{max})."
+
+#, elixir-autogen, elixir-format
+msgid "The file is too large (max 2 MB)."
+msgstr "A fájl túl nagy (legfeljebb 2 MB)."
+
+#, elixir-autogen, elixir-format
+msgid "The interactions could not be imported."
+msgstr "Az interakciókat nem sikerült importálni."
+
+#, elixir-autogen, elixir-format
+msgid "This event has no interactions."
+msgstr "Ennek az eseménynek nincsenek interakciói."
+
+#, elixir-autogen, elixir-format
+msgid "Tiber"
+msgstr "Tevere"
+
+#, elixir-autogen, elixir-format
+msgid "Title: the quiz title or the poll question. Consecutive QUIZ rows with the same title, or with no title, belong to the same quiz."
+msgstr "Cím: a kvíz címe vagy a szavazás kérdése. Az egymást követő, azonos című vagy cím nélküli QUIZ sorok ugyanahhoz a kvízhez tartoznak."
+
+#, elixir-autogen, elixir-format
+msgid "Type: QUIZ or POLL."
+msgstr "Típus: QUIZ vagy POLL."
+
+#, elixir-autogen, elixir-format
+msgid "Unsupported file: use an .xlsx or .csv file."
+msgstr "Nem támogatott fájl: használjon .xlsx vagy .csv fájlt."
+
+#, elixir-autogen, elixir-format
+msgid "What is the capital of Italy?"
+msgstr "Mi Olaszország fővárosa?"
+
+#, elixir-autogen, elixir-format
+msgid "Which of these are rivers?"
+msgstr "Melyek folyók ezek közül?"
+
+#, elixir-autogen, elixir-format
+msgid "Write one row for each quiz question or poll, keeping the columns in the order of the \"%{sheet}\" sheet. The header row is optional."
+msgstr "Minden kvízkérdéshez vagy szavazáshoz írjon egy sort, a(z) \"%{sheet}\" munkalap oszlopsorrendjét megtartva. A fejléc sor elhagyható."
+
+#, elixir-autogen, elixir-format
+msgid "YES"
+msgstr "IGEN"
+
+#, elixir-autogen, elixir-format
+msgid "You have no other events to import from."
+msgstr "Nincs más esemény, amelyből importálhatna."
+
+#, elixir-autogen, elixir-format
+msgid "at least two answers are required"
+msgstr "legalább két válasz szükséges"
+
+#, elixir-autogen, elixir-format
+msgid "multiple answers must be YES or NO"
+msgstr "a több válaszlehetőség értéke IGEN vagy NEM lehet"
+
+#, elixir-autogen, elixir-format
+msgid "only one correct answer is allowed when multiple answers is NO"
+msgstr "csak egy helyes válasz engedélyezett, ha a több válaszlehetőség értéke NEM"
+
+#, elixir-autogen, elixir-format
+msgid "texts can be at most %{max} characters long"
+msgstr "a szövegek legfeljebb %{max} karakter hosszúak lehetnek"
+
+#, elixir-autogen, elixir-format
+msgid "the correct answers are missing"
+msgstr "hiányoznak a helyes válaszok"
+
+#, elixir-autogen, elixir-format
+msgid "the correct answers must be answer numbers, e.g. 1 or 1;3"
+msgstr "a helyes válaszoknak válaszsorszámoknak kell lenniük, pl. 1 vagy 1;3"
+
+#, elixir-autogen, elixir-format
+msgid "the question is missing"
+msgstr "hiányzik a kérdés"
+
+#, elixir-autogen, elixir-format
+msgid "the title is missing"
+msgstr "hiányzik a cím"
+
+#, elixir-autogen, elixir-format
+msgid "unknown type \"%{type}\", use QUIZ or POLL"
+msgstr "ismeretlen típus: \"%{type}\", használjon QUIZ vagy POLL értéket"
+
+#, elixir-autogen, elixir-format
+msgid "…and %{count} more"
+msgstr "…és még %{count}"

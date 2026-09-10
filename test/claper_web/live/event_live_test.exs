@@ -2,7 +2,7 @@ defmodule ClaperWeb.EventLiveTest do
   use ClaperWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Claper.{FormsFixtures, PresentationsFixtures, QuizzesFixtures}
+  import Claper.{FormsFixtures, PollsFixtures, PresentationsFixtures, QuizzesFixtures}
 
   @update_attrs %{name: "some updated name"}
 
@@ -372,6 +372,75 @@ defmodule ClaperWeb.EventLiveTest do
 
       refute has_element?(manage_live, correct_input.(0))
       assert has_element?(manage_live, correct_input.(1))
+    end
+
+    test "imports the selected interactions of another event", %{
+      conn: conn,
+      user: user,
+      presentation_file: presentation_file
+    } do
+      source_file = presentation_file_fixture(%{user: user, name: "Previous event"}, [:event])
+      poll = poll_fixture(%{presentation_file_id: source_file.id, title: "Reused poll"})
+      quiz_fixture(%{presentation_file: source_file, title: "Not selected"})
+      manage_path = ~p"/e/#{presentation_file.event.code}/manage"
+
+      {:ok, manage_live, _html} = live(conn, "#{manage_path}/import")
+
+      manage_live
+      |> element(~s(button[phx-value-uuid="#{source_file.event.uuid}"]))
+      |> render_click()
+
+      assert render(manage_live) =~ "Reused poll"
+
+      manage_live
+      |> form("#import-event-form", %{keys: [Claper.Interactions.Import.interaction_key(poll)]})
+      |> render_change()
+
+      manage_live |> form("#import-event-form") |> render_submit()
+
+      flash = assert_redirect(manage_live, manage_path)
+      assert flash["info"] == "Interactions imported: 1"
+
+      assert [%{title: "Reused poll", enabled: false}] =
+               Claper.Polls.list_polls_at_position(presentation_file.id, 0)
+
+      assert Claper.Quizzes.list_quizzes_at_position(presentation_file.id, 0) == []
+    end
+
+    test "imports quizzes and polls from a spreadsheet", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      manage_path = ~p"/e/#{presentation_file.event.code}/manage"
+      {:ok, manage_live, _html} = live(conn, "#{manage_path}/import")
+
+      manage_live |> element(~s(button[phx-value-tab="file"])) |> render_click()
+
+      upload = fn content ->
+        manage_live
+        |> file_input("#import-file-form", :spreadsheet, [
+          %{name: "interactions.csv", content: content, type: "text/csv"}
+        ])
+        |> render_upload("interactions.csv")
+
+        manage_live |> form("#import-file-form") |> render_submit()
+      end
+
+      assert upload.("POLL;Only one answer;;;;A\n") =~ "Row 1: at least two answers are required"
+
+      assert upload.("POLL;Coffee or tea?;;;;Coffee;Tea\nQUIZ;Maths;2 + 2?;;1;4;5\n") =~
+               "Coffee or tea?"
+
+      manage_live |> element(~s(button[phx-click="import-file"])) |> render_click()
+
+      flash = assert_redirect(manage_live, manage_path)
+      assert flash["info"] == "Interactions imported: 2"
+
+      assert [%{title: "Coffee or tea?"}] =
+               Claper.Polls.list_polls_at_position(presentation_file.id, 0)
+
+      assert [%{title: "Maths"}] =
+               Claper.Quizzes.list_quizzes_at_position(presentation_file.id, 0)
     end
 
     test "prompts to regenerate missing thumbnails and starts regeneration", %{
