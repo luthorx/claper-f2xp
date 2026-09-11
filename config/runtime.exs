@@ -239,7 +239,12 @@ config :claper,
   terms_url: terms_url,
   privacy_url: privacy_url,
   # AGPL: every user of the service is offered the source code of this fork
-  source_code_url: get_var_from_path_or_env(config_dir, "SOURCE_CODE_URL", nil)
+  source_code_url:
+    get_var_from_path_or_env(
+      config_dir,
+      "SOURCE_CODE_URL",
+      "https://github.com/luthorx/claper-f2xp"
+    )
 
 config :claper, :presentations,
   max_file_size: max_file_size,

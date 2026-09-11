@@ -1,3 +1,12 @@
+> **F2XP fork of Claper.** This repository is a modified version of
+> [Claper](https://github.com/ClaperCo/Claper) v3.0.0, maintained by [F2XP](https://f2xp.com)
+> and distributed under the same GNU Affero General Public License v3 (see the LICENSE file).
+>
+> Main changes: F2XP branding; optional event start date and reactivation of finished events;
+> attendee room without the message area when messages are disabled; single or multiple answers
+> per quiz question; import of interactions from other events or spreadsheets; optional quiz time
+> limits; link to this source code in the app. The commit history lists every change.
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
