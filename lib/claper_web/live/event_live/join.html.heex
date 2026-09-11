@@ -66,6 +66,15 @@
         >
           {gettext("About")}
         </a>
+        <a
+          :if={Application.get_env(:claper, :source_code_url)}
+          href={Application.get_env(:claper, :source_code_url)}
+          target="_blank"
+          rel="noopener"
+          class="text-lg font-semibold text-white hover:text-primary-300 transition-colors"
+        >
+          {gettext("Source code")}
+        </a>
         <%= if @current_user do %>
           <.link href={~p"/events"} class="btn btn-primary btn-lg">
             {gettext("Dashboard")}
@@ -95,6 +104,15 @@
           class="text-sm text-white/80 font-medium hover:text-white transition-colors"
         >
           {gettext("About")}
+        </a>
+        <a
+          :if={Application.get_env(:claper, :source_code_url)}
+          href={Application.get_env(:claper, :source_code_url)}
+          target="_blank"
+          rel="noopener"
+          class="text-sm text-white/80 font-medium hover:text-white transition-colors"
+        >
+          {gettext("Source code")}
         </a>
         <%= if @current_user do %>
           <.link href={~p"/events"} class="btn btn-primary">

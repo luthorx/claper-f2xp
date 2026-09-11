@@ -3953,3 +3953,7 @@ msgstr "Tempo rimasto"
 #, elixir-autogen, elixir-format
 msgid "Time limit"
 msgstr "Tempo limite"
+
+#, elixir-autogen, elixir-format
+msgid "Source code"
+msgstr "Codice sorgente"

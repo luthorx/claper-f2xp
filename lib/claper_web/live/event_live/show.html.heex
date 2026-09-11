@@ -51,6 +51,15 @@
           <img src="/images/icons/exit-outline.svg" class="mr-3 h-5" />
           <span>{gettext("Leave")}</span>
         </a>
+        <a
+          :if={Application.get_env(:claper, :source_code_url)}
+          href={Application.get_env(:claper, :source_code_url)}
+          target="_blank"
+          rel="noopener"
+          class="mt-auto mb-4 text-xs text-gray-500 underline"
+        >
+          {gettext("Source code")}
+        </a>
       </aside>
 
       <div
@@ -660,6 +669,15 @@
     <a href="https://f2xp.com" target="_blank" class="powered-by">
       <span>{gettext("Powered by")}</span>
       <img src="/images/logo-large.svg" alt="F2XP" />
+    </a>
+    <a
+      :if={Application.get_env(:claper, :source_code_url)}
+      href={Application.get_env(:claper, :source_code_url)}
+      target="_blank"
+      rel="noopener"
+      class="powered-by"
+    >
+      {gettext("Source code")}
     </a>
   </div>
 <% end %>

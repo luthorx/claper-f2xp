@@ -8,6 +8,11 @@
     {gettext("Admin")}
   </a>
 </li>
+<li :if={Application.get_env(:claper, :source_code_url)}>
+  <a href={Application.get_env(:claper, :source_code_url)} target="_blank" rel="noopener">
+    {gettext("Source code")}
+  </a>
+</li>
 <li>
   {link(gettext("Logout"),
     to: ~p"/users/log_out",

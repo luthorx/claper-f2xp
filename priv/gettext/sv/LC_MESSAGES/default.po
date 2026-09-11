@@ -3988,3 +3988,7 @@ msgstr "Återstående tid"
 #, elixir-autogen, elixir-format
 msgid "Time limit"
 msgstr "Tidsgräns"
+
+#, elixir-autogen, elixir-format
+msgid "Source code"
+msgstr "Källkod"

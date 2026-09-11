@@ -237,7 +237,9 @@ config :claper,
   remote_ip_proxies: remote_ip_proxies,
   remote_ip_headers: remote_ip_headers,
   terms_url: terms_url,
-  privacy_url: privacy_url
+  privacy_url: privacy_url,
+  # AGPL: every user of the service is offered the source code of this fork
+  source_code_url: get_var_from_path_or_env(config_dir, "SOURCE_CODE_URL", nil)
 
 config :claper, :presentations,
   max_file_size: max_file_size,
