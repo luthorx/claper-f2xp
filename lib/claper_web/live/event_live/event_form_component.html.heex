@@ -280,7 +280,7 @@
         id="facilitators-section"
         class={[
           "space-y-4",
-          !@event.expired_at && "border-b border-base-300 pb-7"
+          @is_owner && "border-b border-base-300 pb-7"
         ]}
         aria-labelledby="facilitators-heading"
       >
@@ -291,10 +291,15 @@
                 {gettext("Facilitators")}
               </h2>
               <p class="mt-1 text-xs leading-5 text-base-content/60">
-                {gettext("Invite people who can present and manage audience interactions.")}
+                <%= if @is_owner do %>
+                  {gettext("Invite people who can present and manage audience interactions.")}
+                <% else %>
+                  {gettext("Only the owner of the event can change its facilitators.")}
+                <% end %>
               </p>
             </div>
             <button
+              :if={@is_owner}
               type="button"
               phx-click="add-leader"
               phx-target={@myself}
@@ -323,89 +328,120 @@
             {gettext("No facilitators have been added yet.")}
           </p>
 
-          <div class="flex flex-col gap-3">
+          <ul
+            :if={!@is_owner && leaders != []}
+            id="facilitators-readonly"
+            class="flex flex-col gap-2"
+          >
+            <li
+              :for={leader <- leaders}
+              class="flex min-w-0 items-center justify-between gap-2 text-sm"
+            >
+              <span class="truncate">{leader.email}</span>
+              <span :if={leader.can_edit} class="badge badge-ghost badge-sm shrink-0">
+                {gettext("Can edit the event")}
+              </span>
+            </li>
+          </ul>
+
+          <div :if={@is_owner} class="flex flex-col gap-4">
             <%= inputs_for f, :leaders, fn l -> %>
-              <div
-                class="flex min-w-0 items-end gap-2"
-                id={"facilitator-#{l.data.temp_id || l.id}"}
-              >
-                <div class="avatar avatar-placeholder hidden shrink-0 pb-1 sm:flex">
-                  <div class="w-10 rounded-full bg-secondary text-secondary-content">
-                    <span class="text-sm font-bold">
-                      {(l.data.email || "?") |> String.first() |> String.upcase()}
-                    </span>
+              <div class="min-w-0" id={"facilitator-#{l.data.temp_id || l.id}"}>
+                <div class="flex min-w-0 items-end gap-2">
+                  <div class="avatar avatar-placeholder hidden shrink-0 pb-1 sm:flex">
+                    <div class="w-10 rounded-full bg-secondary text-secondary-content">
+                      <span class="text-sm font-bold">
+                        {(l.data.email || "?") |> String.first() |> String.upcase()}
+                      </span>
+                    </div>
                   </div>
+
+                  <div class="min-w-0 flex-1">
+                    <.text_field
+                      form={l}
+                      key={:email}
+                      type="email"
+                      label={gettext("Email address")}
+                      placeholder={gettext("name@example.com")}
+                      readonly={is_nil(l.data.temp_id)}
+                      autocomplete="email"
+                    />
+                  </div>
+
+                  {hidden_input(l, :temp_id)}
+                  {hidden_input(l, :event_id, value: @event.id)}
+                  {hidden_input(l, :user_email, value: @current_user.email)}
+
+                  <%= if is_nil(l.data.temp_id) do %>
+                    {checkbox(l, :delete, class: "hidden")}
+                    <button
+                      type="button"
+                      phx-click={
+                        JS.set_attribute({"checked", "checked"}, to: "##{input_id(l, :delete)}")
+                        |> JS.hide(to: "#facilitator-#{l.id}")
+                      }
+                      aria-label={gettext("Remove facilitator")}
+                      class="btn btn-circle btn-error !size-12 shrink-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="h-5 w-5"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 18 18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  <% else %>
+                    <button
+                      type="button"
+                      phx-click="remove-leader"
+                      phx-value-remove={l.data.temp_id}
+                      phx-target={@myself}
+                      aria-label={gettext("Remove facilitator")}
+                      class="btn btn-circle btn-error !size-12 shrink-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="h-5 w-5"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 18 18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  <% end %>
                 </div>
 
-                <div class="min-w-0 flex-1">
-                  <.text_field
-                    form={l}
-                    key={:email}
-                    type="email"
-                    label={gettext("Email address")}
-                    placeholder={gettext("name@example.com")}
-                    readonly={is_nil(l.data.temp_id)}
-                    autocomplete="email"
-                  />
-                </div>
-
-                {hidden_input(l, :temp_id)}
-                {hidden_input(l, :event_id, value: @event.id)}
-                {hidden_input(l, :user_email, value: @current_user.email)}
-
-                <%= if is_nil(l.data.temp_id) do %>
-                  {checkbox(l, :delete, class: "hidden")}
-                  <button
-                    type="button"
-                    phx-click={
-                      JS.set_attribute({"checked", "checked"}, to: "##{input_id(l, :delete)}")
-                      |> JS.hide(to: "#facilitator-#{l.id}")
+                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 sm:pl-12">
+                  <label class="flex cursor-pointer items-center gap-2 text-xs text-base-content/80">
+                    {checkbox(l, :can_edit, class: "checkbox checkbox-primary checkbox-xs")}
+                    {gettext("Can edit the event")}
+                  </label>
+                  <span
+                    :if={
+                      is_nil(l.data.temp_id) &&
+                        not MapSet.member?(@leader_accounts, String.downcase(l.data.email || ""))
                     }
-                    aria-label={gettext("Remove facilitator")}
-                    class="btn btn-circle btn-error !size-12 shrink-0"
+                    class="badge badge-warning badge-sm"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="2"
-                      stroke="currentColor"
-                      class="h-5 w-5"
-                      aria-hidden="true"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 18 18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                <% else %>
-                  <button
-                    type="button"
-                    phx-click="remove-leader"
-                    phx-value-remove={l.data.temp_id}
-                    phx-target={@myself}
-                    aria-label={gettext("Remove facilitator")}
-                    class="btn btn-circle btn-error !size-12 shrink-0"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="2"
-                      stroke="currentColor"
-                      class="h-5 w-5"
-                      aria-hidden="true"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 18 18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                <% end %>
+                    {gettext("No account yet")}
+                  </span>
+                </div>
               </div>
             <% end %>
           </div>
@@ -414,7 +450,81 @@
     </.form>
 
     <section
-      :if={@action == :edit && !@event.expired_at}
+      :if={@action == :edit && @is_owner}
+      id="transfer-section"
+      class={["space-y-3", !@event.expired_at && "border-b border-base-300 pb-7"]}
+      aria-labelledby="transfer-heading"
+    >
+      <div>
+        <h2 id="transfer-heading" class="text-base font-bold text-secondary">
+          {gettext("Transfer ownership")}
+        </h2>
+        <p class="mt-1 text-xs leading-5 text-base-content/60">
+          {gettext(
+            "Give this event to another user with an account. You will stay on as a facilitator who can edit it."
+          )}
+        </p>
+      </div>
+
+      <form
+        :if={is_nil(@transfer_email)}
+        id="transfer-form"
+        phx-submit="prepare-transfer"
+        phx-target={@myself}
+        class="flex items-start gap-2"
+      >
+        <div class="min-w-0 flex-1">
+          <input
+            type="email"
+            name="transfer[email]"
+            required
+            list="transfer-suggestions"
+            autocomplete="off"
+            placeholder={gettext("name@example.com")}
+            aria-label={gettext("Email of the new owner")}
+            class="input w-full"
+          />
+          <p :if={@transfer_error} id="transfer-error" class="mt-1 text-xs text-error">
+            {@transfer_error}
+          </p>
+        </div>
+        <button type="submit" class="btn btn-outline shrink-0">{gettext("Transfer")}</button>
+        <datalist id="transfer-suggestions">
+          <option :for={email <- @leader_accounts} value={email} />
+        </datalist>
+      </form>
+
+      <div
+        :if={@transfer_email}
+        id="transfer-confirmation"
+        class="rounded-2xl border border-warning/40 bg-warning/10 p-4"
+      >
+        <p class="text-sm">
+          {gettext("Transfer this event to %{email}?", email: @transfer_email)}
+        </p>
+        <div class="mt-3 flex justify-end gap-2">
+          <button
+            type="button"
+            phx-click="cancel-transfer"
+            phx-target={@myself}
+            class="btn btn-ghost btn-sm"
+          >
+            {gettext("Cancel")}
+          </button>
+          <button
+            type="button"
+            phx-click="transfer-event"
+            phx-target={@myself}
+            class="btn btn-warning btn-sm"
+          >
+            {gettext("Confirm transfer")}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      :if={@action == :edit && @is_owner && !@event.expired_at}
       id="event-danger-zone"
       class="space-y-3"
       aria-labelledby="danger-zone-heading"

@@ -194,6 +194,65 @@ defmodule ClaperWeb.EventLiveTest do
       assert Claper.Repo.aggregate(Claper.Events.Event, :count) == event_count
     end
 
+    test "lets a facilitator who can edit change the event but not its facilitators", %{
+      conn: conn,
+      user: user
+    } do
+      owner = Claper.AccountsFixtures.user_fixture()
+      event = presentation_file_fixture(%{user: owner, name: "Shared event"}, [:event]).event
+      Claper.EventsFixtures.activity_leader_fixture(%{event: event, user: user, can_edit: true})
+
+      {:ok, edit_live, _html} = live(conn, ~p"/events/#{event.uuid}/edit")
+
+      assert has_element?(edit_live, "#facilitators-readonly")
+      refute has_element?(edit_live, ~s(button[phx-click="add-leader"]))
+      refute has_element?(edit_live, "#transfer-section")
+      refute has_element?(edit_live, "#event-danger-zone")
+
+      edit_live
+      |> form("#event-form", event: %{name: "Renamed event"})
+      |> render_submit()
+
+      event = Claper.Events.get_event!(event.uuid)
+      assert event.name == "Renamed event"
+      assert event.user_id == owner.id
+    end
+
+    test "sends a facilitator who cannot edit back to the events list", %{conn: conn, user: user} do
+      event = Claper.EventsFixtures.event_fixture()
+      Claper.EventsFixtures.activity_leader_fixture(%{event: event, user: user})
+
+      assert {:error, {:redirect, %{to: "/events"}}} = live(conn, ~p"/events/#{event.uuid}/edit")
+    end
+
+    test "transfers the event to another account", %{
+      conn: conn,
+      user: user,
+      presentation_file: presentation_file
+    } do
+      new_owner = Claper.AccountsFixtures.user_fixture()
+      event = presentation_file.event
+      {:ok, edit_live, _html} = live(conn, ~p"/events/#{event.uuid}/edit")
+
+      assert edit_live
+             |> form("#transfer-form", transfer: %{email: "nobody@example.com"})
+             |> render_submit() =~ "No account uses this email address."
+
+      edit_live
+      |> form("#transfer-form", transfer: %{email: new_owner.email})
+      |> render_submit()
+
+      assert has_element?(edit_live, "#transfer-confirmation", new_owner.email)
+
+      edit_live |> element(~s(button[phx-click="transfer-event"])) |> render_click()
+      assert_redirect(edit_live, ~p"/events")
+
+      event = Claper.Events.get_event!(event.uuid, [:leaders])
+      assert event.user_id == new_owner.id
+      assert [%{can_edit: true} = previous_owner] = event.leaders
+      assert previous_owner.email == String.downcase(user.email)
+    end
+
     test "deletes event in listing", %{conn: conn, presentation_file: presentation_file} do
       {:ok, index_live, _html} = live(conn, ~p"/events/#{presentation_file.event.uuid}/edit")
 

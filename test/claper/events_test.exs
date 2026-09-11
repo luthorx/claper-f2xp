@@ -651,6 +651,74 @@ defmodule Claper.EventsTest do
       leader = activity_leader_fixture()
       assert %Ecto.Changeset{} = Events.change_activity_leader(leader)
     end
+
+    test "led_by?/2 ignores the case of the email address", context do
+      event = Enum.at(context.carol_active_events, 0)
+      assert Events.led_by?(String.upcase(context.alice.email), event)
+    end
+
+    test "create_activity_leader/1 stores the email address lowercase" do
+      {:ok, leader} = Events.create_activity_leader(%{email: " Dan.Smith@Example.com "})
+      assert leader.email == "dan.smith@example.com"
+    end
+
+    test "get_editable_event!/3 lets in the owner and the facilitators who can edit" do
+      owner = user_fixture()
+      editor = user_fixture()
+      helper = user_fixture()
+      event = event_fixture(%{user: owner})
+      activity_leader_fixture(%{event: event, user: editor, can_edit: true})
+      activity_leader_fixture(%{event: event, user: helper})
+
+      assert Events.get_editable_event!(owner, event.uuid).id == event.id
+      assert Events.get_editable_event!(editor, event.uuid).id == event.id
+      assert Events.list_editable_event_ids(editor) == MapSet.new([event.id])
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Events.get_editable_event!(helper, event.uuid)
+      end
+    end
+
+    test "transfer_event/3 hands the event over and keeps the previous owner as an editor" do
+      owner = user_fixture()
+      new_owner = user_fixture()
+      event = event_fixture(%{user: owner})
+      activity_leader_fixture(%{event: event, user: new_owner})
+
+      assert {:ok, event} = Events.transfer_event(event, owner, String.upcase(new_owner.email))
+
+      assert event.user_id == new_owner.id
+      assert [leader] = Events.get_activity_leaders_for_event(event.id)
+      assert leader.email == String.downcase(owner.email)
+      assert leader.can_edit
+      assert Events.get_editable_event!(owner, event.uuid).id == event.id
+    end
+
+    test "transfer_event/3 requires the owner and an existing account" do
+      owner = user_fixture()
+      other = user_fixture()
+      event = event_fixture(%{user: owner})
+
+      assert {:error, :not_owner} = Events.transfer_event(event, other, other.email)
+      assert {:error, :no_account} = Events.transfer_event(event, owner, "nobody@example.com")
+      assert {:error, :already_owner} = Events.transfer_event(event, owner, owner.email)
+    end
+
+    test "duplicate_event/2 keeps the facilitators and their rights" do
+      event = event_fixture()
+      activity_leader_fixture(%{event: event, email: "editor@example.com", can_edit: true})
+      activity_leader_fixture(%{event: event, email: "helper@example.com"})
+
+      {:ok, duplicate} = Events.duplicate_event(event.user_id, event.uuid)
+
+      leaders =
+        duplicate.id
+        |> Events.get_activity_leaders_for_event()
+        |> Enum.map(&{&1.email, &1.can_edit})
+        |> Enum.sort()
+
+      assert leaders == [{"editor@example.com", true}, {"helper@example.com", false}]
+    end
   end
 
   describe "importing events" do

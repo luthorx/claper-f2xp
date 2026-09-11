@@ -3984,3 +3984,55 @@ msgstr "Ziņojumi iespējoti"
 #, elixir-autogen, elixir-format
 msgid "New message"
 msgstr "Jauns ziņojums"
+
+#, elixir-autogen, elixir-format
+msgid "Only the owner of the event can change its facilitators."
+msgstr "Tikai pasākuma īpašnieks var mainīt tā moderatorus."
+
+#, elixir-autogen, elixir-format
+msgid "Can edit the event"
+msgstr "Var rediģēt pasākumu"
+
+#, elixir-autogen, elixir-format
+msgid "No account yet"
+msgstr "Vēl nav konta"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer ownership"
+msgstr "Nodot īpašumtiesības"
+
+#, elixir-autogen, elixir-format
+msgid "Give this event to another user with an account. You will stay on as a facilitator who can edit it."
+msgstr "Nododiet šo pasākumu citam lietotājam ar kontu. Jūs paliksiet moderators un varēsiet to rediģēt."
+
+#, elixir-autogen, elixir-format
+msgid "Email of the new owner"
+msgstr "Jaunā īpašnieka e-pasts"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer"
+msgstr "Nodot"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer this event to %{email}?"
+msgstr "Nodot šo pasākumu %{email}?"
+
+#, elixir-autogen, elixir-format
+msgid "Confirm transfer"
+msgstr "Apstiprināt nodošanu"
+
+#, elixir-autogen, elixir-format
+msgid "No account uses this email address."
+msgstr "Neviens konts neizmanto šo e-pasta adresi."
+
+#, elixir-autogen, elixir-format
+msgid "You already own this event."
+msgstr "Jūs jau esat šī pasākuma īpašnieks."
+
+#, elixir-autogen, elixir-format
+msgid "Event transferred to %{email}"
+msgstr "Pasākums nodots %{email}"
+
+#, elixir-autogen, elixir-format
+msgid "The event could not be transferred."
+msgstr "Pasākumu neizdevās nodot."

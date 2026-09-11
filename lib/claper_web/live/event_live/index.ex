@@ -31,6 +31,7 @@ defmodule ClaperWeb.EventLive.Index do
       |> assign(:search_query, "")
       |> assign(:view_mode, "grid")
       |> assign(:temporary_assigns, events: [])
+      |> assign_editable_event_ids()
       |> load_events()
 
     {:ok, socket}
@@ -91,7 +92,7 @@ defmodule ClaperWeb.EventLive.Index do
 
   @impl true
   def handle_event("terminate", %{"id" => id}, %{assigns: %{current_user: current_user}} = socket) do
-    event = Events.get_user_event!(current_user.id, id)
+    event = Events.get_editable_event!(current_user, id)
     {:ok, _} = Events.terminate_event(event)
     {:noreply, redirect(socket, to: ~p"/events")}
   end
@@ -102,7 +103,7 @@ defmodule ClaperWeb.EventLive.Index do
         %{"id" => id} = params,
         %{assigns: %{current_user: current_user}} = socket
       ) do
-    event = Events.get_user_event!(current_user.id, id)
+    event = Events.get_editable_event!(current_user, id)
 
     case Events.reactivate_event(event, reset: params["reset"] == "true") do
       {:ok, _event} ->
@@ -178,8 +179,9 @@ defmodule ClaperWeb.EventLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    # The owner and the facilitators allowed to edit the event
     event =
-      Events.get_user_event!(socket.assigns.current_user.id, id, [:presentation_file, :leaders])
+      Events.get_editable_event!(socket.assigns.current_user, id, [:presentation_file, :leaders])
 
     # Finished events stay editable, so they can be reused and reactivated
     if event.presentation_file.status == "fail" && event.presentation_file.hash do
@@ -260,8 +262,18 @@ defmodule ClaperWeb.EventLive.Index do
     socket
     |> assign(:has_expired_events, expired_events_count > 0)
     |> assign(:has_invited_events, invited_events_count > 0)
+    |> assign_editable_event_ids()
     |> assign(:events, [])
     |> assign(:page, 1)
     |> load_events()
+  end
+
+  # Invited events that the current user may also edit, terminate and reactivate
+  defp assign_editable_event_ids(socket) do
+    assign(
+      socket,
+      :editable_event_ids,
+      Events.list_editable_event_ids(socket.assigns.current_user)
+    )
   end
 end

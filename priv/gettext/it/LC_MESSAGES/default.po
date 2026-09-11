@@ -3981,3 +3981,55 @@ msgstr "Messaggi attivati"
 #, elixir-autogen, elixir-format
 msgid "New message"
 msgstr "Nuovo messaggio"
+
+#, elixir-autogen, elixir-format
+msgid "Only the owner of the event can change its facilitators."
+msgstr "Solo il proprietario dell'evento può modificarne i facilitatori."
+
+#, elixir-autogen, elixir-format
+msgid "Can edit the event"
+msgstr "Può modificare l'evento"
+
+#, elixir-autogen, elixir-format
+msgid "No account yet"
+msgstr "Ancora senza account"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer ownership"
+msgstr "Trasferisci la proprietà"
+
+#, elixir-autogen, elixir-format
+msgid "Give this event to another user with an account. You will stay on as a facilitator who can edit it."
+msgstr "Cedi questo evento a un altro utente con un account. Resterai facilitatore e potrai ancora modificarlo."
+
+#, elixir-autogen, elixir-format
+msgid "Email of the new owner"
+msgstr "Email del nuovo proprietario"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer"
+msgstr "Trasferisci"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer this event to %{email}?"
+msgstr "Trasferire questo evento a %{email}?"
+
+#, elixir-autogen, elixir-format
+msgid "Confirm transfer"
+msgstr "Conferma trasferimento"
+
+#, elixir-autogen, elixir-format
+msgid "No account uses this email address."
+msgstr "Nessun account usa questo indirizzo email."
+
+#, elixir-autogen, elixir-format
+msgid "You already own this event."
+msgstr "Sei già il proprietario di questo evento."
+
+#, elixir-autogen, elixir-format
+msgid "Event transferred to %{email}"
+msgstr "Evento trasferito a %{email}"
+
+#, elixir-autogen, elixir-format
+msgid "The event could not be transferred."
+msgstr "Non è stato possibile trasferire l'evento."

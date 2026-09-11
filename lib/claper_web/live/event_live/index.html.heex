@@ -164,6 +164,7 @@
           event={event}
           current_time={current_time}
           is_leader={@active_tab == "invited"}
+          can_edit={MapSet.member?(@editable_event_ids, event.id)}
           view_mode="mobile"
         />
       <% end %>
@@ -185,6 +186,7 @@
             event={event}
             current_time={current_time}
             is_leader={@active_tab == "invited"}
+            can_edit={MapSet.member?(@editable_event_ids, event.id)}
             view_mode={@view_mode}
           />
         <% end %>
@@ -200,6 +202,7 @@
             event={event}
             current_time={current_time}
             is_leader={@active_tab == "invited"}
+            can_edit={MapSet.member?(@editable_event_ids, event.id)}
             view_mode={@view_mode}
           />
         <% end %>
@@ -302,6 +305,7 @@
         action={@live_action}
         return_to={~p"/events"}
         current_user={@current_user}
+        is_owner={is_nil(@event.id) or @event.user_id == @current_user.id}
         container={:drawer}
       />
     </div>

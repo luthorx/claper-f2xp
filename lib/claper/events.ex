@@ -143,15 +143,9 @@ defmodule Claper.Events do
 
   """
   def list_managed_events_by(email, preload \\ []) do
-    from(a in ActivityLeader,
-      join: u in Accounts.User,
-      on: u.email == a.email,
-      join: e in Event,
-      on: e.id == a.event_id,
-      where: a.email == ^email,
-      order_by: [desc: e.expired_at, desc: e.id],
-      select: e
-    )
+    email
+    |> managed_events_query()
+    |> order_by([_a, _u, e], desc: e.expired_at, desc: e.id)
     |> Repo.all()
     |> Repo.preload(preload)
   end
@@ -171,30 +165,30 @@ defmodule Claper.Events do
     search = Map.get(params, "search", nil)
 
     query =
-      from(a in ActivityLeader,
-        join: u in Accounts.User,
-        on: u.email == a.email,
-        join: e in Event,
-        on: e.id == a.event_id,
-        where: a.email == ^email,
-        order_by: [desc: e.expired_at, desc: e.id],
-        select: e
-      )
+      email
+      |> managed_events_query()
+      |> order_by([_a, _u, e], desc: e.expired_at, desc: e.id)
       |> apply_search_managed(search)
 
     Repo.paginate(query, page: page, page_size: page_size, preload: preload)
   end
 
   def count_managed_events_by(email) do
+    email
+    |> managed_events_query()
+    |> Repo.aggregate(:count, :id)
+  end
+
+  # Events with a facilitator whose address, whatever its case, belongs to an account
+  defp managed_events_query(email) do
     from(a in ActivityLeader,
       join: u in Accounts.User,
-      on: u.email == a.email,
+      on: fragment("lower(?)", u.email) == fragment("lower(?)", a.email),
       join: e in Event,
       on: e.id == a.event_id,
-      where: a.email == ^email,
+      where: fragment("lower(?)", a.email) == ^String.downcase(email),
       select: e
     )
-    |> Repo.aggregate(:count, :id)
   end
 
   def count_expired_events(user_id) do
@@ -292,12 +286,51 @@ defmodule Claper.Events do
       on: e.user_id == u.id,
       left_join: a in ActivityLeader,
       on: e.id == a.event_id,
-      where: e.uuid == ^uuid and (u.id == ^user.id or a.email == ^user.email),
+      where:
+        e.uuid == ^uuid and
+          (u.id == ^user.id or fragment("lower(?)", a.email) == ^String.downcase(user.email)),
       distinct: true,
       select: e
     )
     |> Repo.one!()
     |> Repo.preload(preload)
+  end
+
+  @doc """
+  Gets an event the user may edit: as its owner or as a facilitator allowed to edit it.
+
+  Raises `Ecto.NoResultsError` otherwise.
+
+  ## Examples
+
+      iex> get_editable_event!(user, "123e4567-e89b-12d3-a456-426614174000")
+      %Event{}
+
+  """
+  def get_editable_event!(user, uuid, preload \\ []) do
+    from(e in Event,
+      left_join: a in ActivityLeader,
+      on:
+        a.event_id == e.id and a.can_edit and
+          fragment("lower(?)", a.email) == ^String.downcase(user.email),
+      where: e.uuid == ^uuid and (e.user_id == ^user.id or not is_nil(a.id)),
+      distinct: true,
+      select: e
+    )
+    |> Repo.one!()
+    |> Repo.preload(preload)
+  end
+
+  @doc """
+  Returns the ids of the events the user facilitates with the right to edit them.
+  """
+  def list_editable_event_ids(user) do
+    from(a in ActivityLeader,
+      where: a.can_edit and fragment("lower(?)", a.email) == ^String.downcase(user.email),
+      select: a.event_id
+    )
+    |> Repo.all()
+    |> MapSet.new()
   end
 
   @doc """
@@ -357,13 +390,9 @@ defmodule Claper.Events do
 
   """
   def led_by?(email, event) do
-    from(a in ActivityLeader,
-      join: u in Accounts.User,
-      on: u.email == a.email,
-      join: e in Event,
-      on: e.id == a.event_id,
-      where: a.email == ^email and e.id == ^event.id
-    )
+    email
+    |> managed_events_query()
+    |> where([_a, _u, e], e.id == ^event.id)
     |> Repo.exists?()
   end
 
@@ -711,6 +740,7 @@ defmodule Claper.Events do
   def duplicate_event(user_id, event_uuid) do
     original =
       get_user_event!(user_id, event_uuid,
+        leaders: [],
         presentation_file: [
           presentation_state: [],
           polls: [:poll_opts],
@@ -749,7 +779,8 @@ defmodule Claper.Events do
     attrs =
       Map.from_struct(original)
       |> Map.drop([:id, :inserted_at, :updated_at, :presentation_file, :expired_at])
-      |> Map.put(:leaders, [])
+      # The copy keeps the facilitators, with the same rights
+      |> Map.put(:leaders, Enum.map(original.leaders, &Map.take(&1, [:email, :can_edit])))
       |> Map.put(:code, "#{code}")
       |> Map.put(:name, "#{original.name} (Copy)")
 
@@ -989,7 +1020,7 @@ defmodule Claper.Events do
   def get_activity_leaders_for_event(event_id) do
     from(a in ActivityLeader,
       left_join: u in Accounts.User,
-      on: u.email == a.email,
+      on: fragment("lower(?)", u.email) == fragment("lower(?)", a.email),
       where: a.event_id == ^event_id,
       select: %{a | user_id: u.id}
     )
@@ -1007,6 +1038,56 @@ defmodule Claper.Events do
   """
   def change_activity_leader(%ActivityLeader{} = activity_leader, attrs \\ %{}) do
     ActivityLeader.changeset(activity_leader, attrs)
+  end
+
+  @doc """
+  Transfers an event from its owner to another account.
+
+  The new owner stops being a facilitator of the event, while the previous
+  owner becomes a facilitator who can still edit it.
+
+  Returns `{:ok, event}`, or `{:error, reason}` where reason is `:not_owner`,
+  `:no_account` or `:already_owner`.
+  """
+  def transfer_event(%Event{} = event, %Accounts.User{} = owner, new_owner_email)
+      when is_binary(new_owner_email) do
+    new_owner = new_owner_email |> String.trim() |> Accounts.get_user_by_email()
+
+    cond do
+      event.user_id != owner.id -> {:error, :not_owner}
+      is_nil(new_owner) -> {:error, :no_account}
+      new_owner.id == owner.id -> {:error, :already_owner}
+      true -> do_transfer_event(event, owner, new_owner)
+    end
+  end
+
+  defp do_transfer_event(event, owner, new_owner) do
+    emails = [String.downcase(owner.email), String.downcase(new_owner.email)]
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.delete_all(
+      :facilitators,
+      from(a in ActivityLeader,
+        where: a.event_id == ^event.id and fragment("lower(?) = ANY(?)", a.email, ^emails)
+      )
+    )
+    |> Ecto.Multi.insert(:previous_owner, fn _changes ->
+      ActivityLeader.changeset(%ActivityLeader{}, %{
+        email: owner.email,
+        event_id: event.id,
+        can_edit: true
+      })
+    end)
+    |> Ecto.Multi.update(:event, Ecto.Changeset.change(event, user_id: new_owner.id))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{event: event}} ->
+        broadcast_all_users({:updated, Repo.preload(event, [:leaders], force: true)})
+        {:ok, event}
+
+      {:error, _operation, reason, _changes} ->
+        {:error, reason}
+    end
   end
 
   @doc """

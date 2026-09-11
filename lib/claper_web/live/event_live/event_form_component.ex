@@ -2,7 +2,10 @@ defmodule ClaperWeb.EventLive.EventFormComponent do
   alias Claper.Presentations.PresentationFile
   use ClaperWeb, :live_component
 
-  alias Claper.Events
+  alias Claper.{Accounts, Events}
+
+  # Facilitators and ownership are managed by the owner only
+  @owner_only_events ~w(add-leader remove-leader prepare-transfer cancel-transfer transfer-event)
 
   @impl true
   def update(%{event: event} = assigns, socket) do
@@ -14,6 +17,10 @@ defmodule ClaperWeb.EventLive.EventFormComponent do
      socket
      |> assign(assigns)
      |> assign_new(:container, fn -> :page end)
+     |> assign_new(:is_owner, fn -> true end)
+     |> assign_new(:transfer_email, fn -> nil end)
+     |> assign_new(:transfer_error, fn -> nil end)
+     |> assign(:leader_accounts, leader_accounts(event))
      |> assign(:changeset, changeset)
      |> assign(:max_file_size, max_file_size)
      |> allow_upload(:presentation_file,
@@ -29,7 +36,7 @@ defmodule ClaperWeb.EventLive.EventFormComponent do
   def handle_event("validate", %{"event" => event_params}, socket) do
     changeset =
       socket.assigns.event
-      |> Events.change_event(event_params)
+      |> Events.change_event(permitted_event_params(event_params, socket.assigns.is_owner))
       |> Map.put(:action, :validate)
 
     {:noreply, socket |> assign(:changeset, changeset)}
@@ -47,10 +54,18 @@ defmodule ClaperWeb.EventLive.EventFormComponent do
 
   @impl true
   def handle_event("save", %{"event" => event_params}, socket) do
+    event_params = permitted_event_params(event_params, socket.assigns.is_owner)
+
     case uploaded_entries(socket, :presentation_file) do
       {_, []} -> save_event(socket, socket.assigns.action, event_params)
       _ -> {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_event(event, _params, %{assigns: %{is_owner: false}} = socket)
+      when event in @owner_only_events do
+    {:noreply, socket}
   end
 
   @impl true
@@ -108,6 +123,65 @@ defmodule ClaperWeb.EventLive.EventFormComponent do
 
     {:noreply, assign(socket, changeset: updated_changeset)}
   end
+
+  @impl true
+  def handle_event("prepare-transfer", %{"transfer" => %{"email" => email}}, socket) do
+    new_owner = email |> String.trim() |> Accounts.get_user_by_email()
+
+    cond do
+      is_nil(new_owner) ->
+        {:noreply, transfer_step(socket, nil, gettext("No account uses this email address."))}
+
+      new_owner.id == socket.assigns.current_user.id ->
+        {:noreply, transfer_step(socket, nil, gettext("You already own this event."))}
+
+      true ->
+        {:noreply, transfer_step(socket, new_owner.email, nil)}
+    end
+  end
+
+  @impl true
+  def handle_event("cancel-transfer", _params, socket) do
+    {:noreply, transfer_step(socket, nil, nil)}
+  end
+
+  @impl true
+  def handle_event("transfer-event", _params, %{assigns: %{transfer_email: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("transfer-event", _params, %{assigns: %{transfer_email: email}} = socket) do
+    case Events.transfer_event(socket.assigns.event, socket.assigns.current_user, email) do
+      {:ok, event} ->
+        Claper.Accounts.LeaderNotifier.deliver_event_invitation(
+          event.name,
+          email,
+          url(~p"/events")
+        )
+
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Event transferred to %{email}", email: email))
+         |> redirect(to: socket.assigns.return_to)}
+
+      {:error, _reason} ->
+        {:noreply, transfer_step(socket, nil, gettext("The event could not be transferred."))}
+    end
+  end
+
+  defp transfer_step(socket, email, error) do
+    socket |> assign(:transfer_email, email) |> assign(:transfer_error, error)
+  end
+
+  # The owner is never changed from this form, and only the owner changes facilitators
+  defp permitted_event_params(params, true = _is_owner), do: Map.delete(params, "user_id")
+  defp permitted_event_params(params, false), do: Map.drop(params, ["user_id", "leaders"])
+
+  defp leader_accounts(%{leaders: leaders}) when is_list(leaders),
+    do: leaders |> Enum.map(& &1.email) |> Accounts.existing_user_emails()
+
+  defp leader_accounts(_event), do: MapSet.new()
 
   defp get_temp_id, do: :crypto.strong_rand_bytes(5) |> Base.url_encode64() |> binary_part(0, 5)
 
@@ -306,12 +380,12 @@ defmodule ClaperWeb.EventLive.EventFormComponent do
 
   defp send_email_to_leaders(socket, event) do
     with e <- Events.get_event!(event.uuid, [:leaders]) do
-      # Get the leaders before the update
-      previous_leaders = socket.assigns.event.leaders
+      # Addresses of the facilitators before the update: changing only whether
+      # a facilitator can edit must not send the invitation again
+      previous_emails = MapSet.new(socket.assigns.event.leaders, & &1.email)
 
       Enum.each(e.leaders, fn leader ->
-        # Only send email if leader was not present before the update
-        if !Enum.member?(previous_leaders, leader) do
+        if !MapSet.member?(previous_emails, leader.email) do
           Claper.Accounts.LeaderNotifier.deliver_event_invitation(
             e.name,
             leader.email,

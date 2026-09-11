@@ -8,8 +8,12 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
     assigns =
       assigns
       |> assign_new(:is_leader, fn -> false end)
+      |> assign_new(:can_edit, fn -> false end)
       |> assign_new(:view_mode, fn -> "grid" end)
       |> assign(:thumbnail_url, get_thumbnail_url(assigns.event))
+
+    # The owner, and facilitators allowed to edit, can edit, terminate and reactivate the event
+    assigns = assign(assigns, :can_manage_event, not assigns.is_leader or assigns.can_edit)
 
     case assigns.view_mode do
       "grid" -> render_grid_card(assigns)
@@ -107,7 +111,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
             </div>
             
     <!-- 3-dot Menu -->
-            <div :if={not @is_leader} class="relative shrink-0">
+            <div :if={@can_manage_event} class="relative shrink-0">
               <button
                 phx-click-away={JS.hide(to: "##{dom_id(@id, "dropdown-menu")}")}
                 phx-click={JS.toggle(to: "##{dom_id(@id, "dropdown-menu")}")}
@@ -228,7 +232,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
           </div>
           <!-- End Event Button -->
           <.link
-            :if={Event.started?(@event) && not @is_leader}
+            :if={Event.started?(@event) && @can_manage_event}
             data-confirm={
               gettext("Are you sure you want to terminate this event? You can reactivate it later.")
             }
@@ -444,7 +448,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
               </div>
               <!-- End Event Button -->
               <.link
-                :if={Event.started?(@event) && not @is_leader}
+                :if={Event.started?(@event) && @can_manage_event}
                 data-confirm={
                   gettext(
                     "Are you sure you want to terminate this event? You can reactivate it later."
@@ -493,7 +497,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
             <% end %>
             
     <!-- 3-dot Menu -->
-            <div :if={not @is_leader} class="relative">
+            <div :if={@can_manage_event} class="relative">
               <button
                 phx-click-away={JS.hide(to: "##{dom_id(@id, "dropdown-menu")}")}
                 phx-click={JS.toggle(to: "##{dom_id(@id, "dropdown-menu")}")}
@@ -579,7 +583,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
             </div>
             
     <!-- 3-dot Menu -->
-            <div :if={not @is_leader} class="relative shrink-0">
+            <div :if={@can_manage_event} class="relative shrink-0">
               <button
                 phx-click-away={JS.hide(to: "##{dom_id(@id, "dropdown-menu")}")}
                 phx-click={JS.toggle(to: "##{dom_id(@id, "dropdown-menu")}")}
@@ -697,7 +701,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
               </div>
               <!-- End Event Button -->
               <.link
-                :if={Event.started?(@event) && not @is_leader}
+                :if={Event.started?(@event) && @can_manage_event}
                 data-confirm={
                   gettext(
                     "Are you sure you want to terminate this event? You can reactivate it later."
@@ -754,7 +758,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
   defp render_dropdown_menu(assigns) do
     ~H"""
     <ul class="w-full">
-      <%= if !Event.finished?(@event) && not @is_leader do %>
+      <%= if !Event.finished?(@event) && @can_manage_event do %>
         <li>
           <.link
             patch={~p"/events/#{@event.uuid}/edit"}
@@ -772,7 +776,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
             {gettext("Edit")}
           </.link>
         </li>
-        <li>
+        <li :if={not @is_leader}>
           <button
             phx-value-id={@event.uuid}
             phx-click="duplicate"
@@ -792,7 +796,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
         </li>
       <% end %>
 
-      <%= if Event.finished?(@event) && not @is_leader do %>
+      <%= if Event.finished?(@event) && @can_manage_event do %>
         <li>
           <.link
             patch={~p"/events/#{@event.uuid}/edit"}
@@ -858,7 +862,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
             {gettext("Reactivate from scratch")}
           </.link>
         </li>
-        <li>
+        <li :if={not @is_leader}>
           <button
             phx-value-id={@event.uuid}
             phx-click="duplicate"
@@ -876,7 +880,7 @@ defmodule ClaperWeb.EventLive.EventCardComponent do
             {gettext("Duplicate")}
           </button>
         </li>
-        <li>
+        <li :if={not @is_leader}>
           <.link
             phx-click="delete"
             phx-value-id={@event.uuid}

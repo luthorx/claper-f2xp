@@ -49,6 +49,19 @@ defmodule Claper.Accounts do
   end
 
   @doc """
+  Returns, lowercased, the given email addresses that belong to an active account.
+  """
+  def existing_user_emails(emails) when is_list(emails) do
+    emails = for email <- emails, is_binary(email), do: String.downcase(email)
+
+    User
+    |> where([u], is_nil(u.deleted_at) and fragment("lower(?) = ANY(?)", u.email, ^emails))
+    |> select([u], fragment("lower(?)", u.email))
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
+  @doc """
   Gets a user by email and creates a new user if the user does not exist.
 
   ## Examples

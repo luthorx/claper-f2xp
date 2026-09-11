@@ -3980,3 +3980,55 @@ msgstr "Üzenetek engedélyezve"
 #, elixir-autogen, elixir-format
 msgid "New message"
 msgstr "Új üzenet"
+
+#, elixir-autogen, elixir-format
+msgid "Only the owner of the event can change its facilitators."
+msgstr "Csak az esemény tulajdonosa módosíthatja a facilitátorokat."
+
+#, elixir-autogen, elixir-format
+msgid "Can edit the event"
+msgstr "Szerkesztheti az eseményt"
+
+#, elixir-autogen, elixir-format
+msgid "No account yet"
+msgstr "Még nincs fiókja"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer ownership"
+msgstr "Tulajdonjog átruházása"
+
+#, elixir-autogen, elixir-format
+msgid "Give this event to another user with an account. You will stay on as a facilitator who can edit it."
+msgstr "Adja át ezt az eseményt egy másik, fiókkal rendelkező felhasználónak. Ön facilitátor marad, és továbbra is szerkesztheti."
+
+#, elixir-autogen, elixir-format
+msgid "Email of the new owner"
+msgstr "Az új tulajdonos e-mail címe"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer"
+msgstr "Átruházás"
+
+#, elixir-autogen, elixir-format
+msgid "Transfer this event to %{email}?"
+msgstr "Átruházza ezt az eseményt a következőnek: %{email}?"
+
+#, elixir-autogen, elixir-format
+msgid "Confirm transfer"
+msgstr "Átruházás megerősítése"
+
+#, elixir-autogen, elixir-format
+msgid "No account uses this email address."
+msgstr "Egyik fiók sem használja ezt az e-mail címet."
+
+#, elixir-autogen, elixir-format
+msgid "You already own this event."
+msgstr "Ön már az esemény tulajdonosa."
+
+#, elixir-autogen, elixir-format
+msgid "Event transferred to %{email}"
+msgstr "Esemény átruházva: %{email}"
+
+#, elixir-autogen, elixir-format
+msgid "The event could not be transferred."
+msgstr "Az eseményt nem sikerült átruházni."

@@ -3980,3 +3980,55 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "New message"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Only the owner of the event can change its facilitators."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Can edit the event"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No account yet"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Transfer ownership"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Give this event to another user with an account. You will stay on as a facilitator who can edit it."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Email of the new owner"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Transfer"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Transfer this event to %{email}?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Confirm transfer"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No account uses this email address."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "You already own this event."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Event transferred to %{email}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "The event could not be transferred."
+msgstr ""
