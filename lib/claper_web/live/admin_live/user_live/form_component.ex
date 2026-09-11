@@ -76,6 +76,8 @@ defmodule ClaperWeb.AdminLive.UserLive.FormComponent do
 
           <div class="sm:col-span-6">
             <div class="form-control">
+              <%!-- Sent when the box is unchecked, so an account can be marked unconfirmed again --%>
+              <input type="hidden" name="user[confirmed]" value="false" />
               <label class="label cursor-pointer justify-start">
                 <input
                   type="checkbox"
@@ -120,11 +122,11 @@ defmodule ClaperWeb.AdminLive.UserLive.FormComponent do
       Accounts.list_roles()
       |> Enum.map(&{String.capitalize(&1.name), &1.id})
 
-    # Determine if confirmed checkbox should be checked
+    # Accounts created by an admin are confirmed by default: no confirmation email is sent
     confirmed_checked =
       case assigns.action do
         :edit -> !is_nil(user.confirmed_at)
-        :new -> false
+        :new -> true
       end
 
     {:ok,

@@ -179,6 +179,60 @@ defmodule ClaperWeb.AdminLive.AdminShowTest do
   describe "user form" do
     setup [:register_and_log_in_admin]
 
+    test "the users list links to the new user form when registration is closed", %{conn: conn} do
+      enable_account_creation = Application.get_env(:claper, :enable_account_creation)
+      Application.put_env(:claper, :enable_account_creation, false)
+
+      on_exit(fn ->
+        Application.put_env(:claper, :enable_account_creation, enable_account_creation)
+      end)
+
+      {:ok, view, _html} = live(conn, ~p"/admin/users")
+
+      assert {:error, {:live_redirect, %{to: "/admin/users/new"}}} =
+               view |> element(~s|a[href="/admin/users/new"]|) |> render_click()
+    end
+
+    test "creates a confirmed user with the chosen role", %{conn: conn} do
+      admin_role = Accounts.get_role_by_name("admin")
+      email = unique_user_email()
+      {:ok, view, _html} = live(conn, ~p"/admin/users/new")
+
+      assert has_element?(
+               view,
+               "#user-form input[type=checkbox][name='user[confirmed]'][checked]"
+             )
+
+      view
+      |> form("#user-form", %{
+        "user" => %{
+          "first_name" => "New",
+          "last_name" => "Admin",
+          "email" => email,
+          "password" => valid_user_password(),
+          "role_id" => admin_role.id
+        }
+      })
+      |> render_submit()
+
+      assert_redirect(view, ~p"/admin/users")
+      user = Accounts.get_user_by_email(email)
+      assert user.role_id == admin_role.id
+      assert user.confirmed_at
+    end
+
+    test "marks a confirmed user as unconfirmed", %{conn: conn} do
+      user = confirmed_user_fixture()
+      {:ok, view, _html} = live(conn, ~p"/admin/users/#{user.id}/edit")
+
+      view
+      |> form("#user-form", %{"user" => %{"confirmed" => "false"}})
+      |> render_submit()
+
+      assert_redirect(view, ~p"/admin/users")
+      refute Accounts.get_user!(user.id).confirmed_at
+    end
+
     test "renders first and last name fields", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/admin/users/new")
 
