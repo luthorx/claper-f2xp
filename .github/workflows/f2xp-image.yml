@@ -1,0 +1,113 @@
+name: F2XP image
+
+# Tests every push to the f2xp branch, then publishes the linux/amd64 image
+# to ghcr.io/luthorx/claper-f2xp with the short commit sha and "latest" tags.
+
+on:
+  push:
+    branches: ["f2xp"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: f2xp-image
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:17-alpine
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: claper
+          POSTGRES_PASSWORD: claper
+          POSTGRES_DB: claper_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      DATABASE_URL: postgres://claper:claper@localhost:5432/claper_test
+      # Same public test-only key as config/test.exs
+      SECRET_KEY_BASE: YnJKcv692Yso3lHGqaJ6kJxKBDh0BUL+mJhguLm5rzoJ+xCEuN7MdrguMSnHKoz4
+      BASE_URL: http://localhost:4000
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18.4"
+          otp-version: "28.0.1"
+
+      - name: Restore dependencies and build cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-test-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+  image:
+    name: Build and push image
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/luthorx/claper-f2xp
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
