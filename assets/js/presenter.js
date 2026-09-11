@@ -39,6 +39,22 @@ export class Presenter {
 
     });
 
+    // Slides were deleted or reordered: #slider is ignored by LiveView, so rebuild it here
+    this.context.handleEvent("slides-updated", (data) => {
+      this.slider.destroy();
+      const sliderEl = document.getElementById("slider");
+      sliderEl.replaceChildren(
+        ...data.urls.map((src) => {
+          const img = document.createElement("img");
+          img.src = src;
+          img.className = "max-h-screen w-auto!";
+          return img;
+        }),
+      );
+      this.currentPage = parseInt(data.current_page);
+      this.init(true);
+    });
+
     this.context.handleEvent("chat-visible", (data) => {
       if (data.value) {
         document

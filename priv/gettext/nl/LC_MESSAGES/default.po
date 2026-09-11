@@ -3958,3 +3958,19 @@ msgstr "Tijdslimiet"
 #, elixir-autogen, elixir-format
 msgid "Source code"
 msgstr "Broncode"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide"
+msgstr "Dia verwijderen"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide %{number}? Any interactions on it will be moved to slide %{target}."
+msgstr "Dia %{number} verwijderen? Eventuele interacties worden verplaatst naar dia %{target}."
+
+#, elixir-autogen, elixir-format
+msgid "Slide deleted"
+msgstr "Dia verwijderd"
+
+#, elixir-autogen, elixir-format
+msgid "Could not delete the slide"
+msgstr "Kon dia niet verwijderen"

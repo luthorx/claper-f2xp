@@ -124,6 +124,16 @@ defmodule ClaperWeb.EventLive.Presenter do
   end
 
   @impl true
+  def handle_info({:slides_updated, presentation_file}, socket) do
+    # LiveView doesn't patch the slider (phx-update="ignore"): the hook rebuilds it
+    {:noreply,
+     push_event(socket, "slides-updated", %{
+       urls: Claper.Presentations.get_slide_urls(presentation_file),
+       current_page: socket.assigns.state.position
+     })}
+  end
+
+  @impl true
   def handle_info({:post_updated, updated_post}, socket) do
     updated_posts = update_post_in_list(socket.assigns.posts, updated_post)
     updated_pinned_posts = update_post_in_list(socket.assigns.pinned_posts, updated_post)

@@ -151,6 +151,68 @@ defmodule Claper.PresentationsTest do
       assert {:error, :invalid_position} = Presentations.reorder_slides(presentation_file, -1, 2)
       assert {:error, :invalid_position} = Presentations.reorder_slides(presentation_file, 0, 5)
     end
+
+    test "delete_slide/2 drops the slide and keeps its interactions on the previous one" do
+      presentation_file = presentation_file_fixture(%{length: 4})
+      presentation_state_fixture(%{presentation_file: presentation_file, position: 3})
+
+      poll_at_1 = poll_fixture(%{presentation_file_id: presentation_file.id, position: 1})
+      poll_at_2 = poll_fixture(%{presentation_file_id: presentation_file.id, position: 2})
+      poll_at_3 = poll_fixture(%{presentation_file_id: presentation_file.id, position: 3})
+
+      Presentations.subscribe(presentation_file.id)
+
+      assert {:ok, presentation_file, state} = Presentations.delete_slide(presentation_file, 2)
+
+      assert presentation_file.length == 3
+      assert presentation_file.slide_order == [1, 2, 4]
+      assert state.position == 2
+      assert %{position: 1, enabled: true} = Claper.Polls.get_poll!(poll_at_1.id)
+      assert %{position: 1, enabled: false} = Claper.Polls.get_poll!(poll_at_2.id)
+      assert %{position: 2, enabled: true} = Claper.Polls.get_poll!(poll_at_3.id)
+      assert_received {:state_updated, %{position: 2}}
+      assert_received {:slides_updated, %{length: 3}}
+    end
+
+    test "delete_slide/2 follows the slide order and keeps first-slide interactions at 0" do
+      put_local_storage_config(unique_storage_dir())
+
+      presentation_file = presentation_file_fixture(%{hash: "deleted", length: 3})
+
+      {:ok, presentation_file} =
+        Presentations.update_presentation_file(presentation_file, %{slide_order: [2, 3, 1]})
+
+      presentation_state_fixture(%{presentation_file: presentation_file, position: 0})
+
+      quiz =
+        Claper.QuizzesFixtures.quiz_fixture(%{
+          presentation_file: presentation_file,
+          position: 0,
+          enabled: true
+        })
+
+      assert {:ok, presentation_file, state} = Presentations.delete_slide(presentation_file, 0)
+
+      assert Presentations.get_slide_urls(presentation_file) == [
+               "/uploads/deleted/3.jpg",
+               "/uploads/deleted/1.jpg"
+             ]
+
+      assert Presentations.get_first_slide_url(presentation_file) == "/uploads/deleted/3.jpg"
+      assert Presentations.slide_file_indexes(presentation_file) == [3, 1]
+      assert state.position == 0
+      assert %{position: 0, enabled: false} = Claper.Quizzes.get_quiz!(quiz.id)
+    end
+
+    test "delete_slide/2 rejects invalid positions and the only slide" do
+      presentation_file = presentation_file_fixture(%{length: 2})
+
+      assert {:error, :invalid_position} = Presentations.delete_slide(presentation_file, -1)
+      assert {:error, :invalid_position} = Presentations.delete_slide(presentation_file, 2)
+
+      single_slide = presentation_file_fixture(%{length: 1})
+      assert {:error, :invalid_position} = Presentations.delete_slide(single_slide, 0)
+    end
   end
 
   describe "presentation_states" do

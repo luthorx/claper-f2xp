@@ -30,24 +30,61 @@ defmodule ClaperWeb.EventLive.ManageSlidePreviewComponent do
           </svg>
           <span class="font-bold text-sm text-[#140553]">{gettext("Preview")}</span>
         </div>
-        <div class="flex items-center gap-x-2 bg-gray-100 rounded-full px-4 py-2 text-sm text-secondary-500">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M2.5 3.3335H17.5M3.33333 3.3335V11.6668C3.33333 12.1089 3.50893 12.5328 3.82149 12.8453C4.13405 13.1579 4.55797 13.3335 5 13.3335H15C15.442 13.3335 15.866 13.1579 16.1785 12.8453C16.4911 12.5328 16.6667 12.1089 16.6667 11.6668V3.3335M10 13.3335V16.6668M7.5 16.6668H12.5"
+        <div class="flex items-center gap-x-2">
+          <button
+            :if={@total_slides > 1}
+            type="button"
+            phx-click="delete-slide"
+            phx-value-position={@current_position}
+            data-confirm={
+              gettext(
+                "Delete slide %{number}? Any interactions on it will be moved to slide %{target}.",
+                number: @current_position + 1,
+                target: max(@current_position, 1)
+              )
+            }
+            title={gettext("Delete slide")}
+            class="flex items-center gap-x-1.5 rounded-full px-3 py-2 text-sm text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
               stroke="currentColor"
-              stroke-width="1.7"
+              stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-            />
-            <path
-              d="M6.66699 10.0003L9.16699 7.50033L10.8337 9.16699L13.3337 6.66699"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span class="font-normal">{@current_position + 1}/ {@total_slides}</span>
+              aria-hidden="true"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M4 7l16 0" />
+              <path d="M10 11l0 6" />
+              <path d="M14 11l0 6" />
+              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+            </svg>
+            <span class="hidden sm:inline">{gettext("Delete slide")}</span>
+          </button>
+          <div class="flex items-center gap-x-2 bg-gray-100 rounded-full px-4 py-2 text-sm text-secondary-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M2.5 3.3335H17.5M3.33333 3.3335V11.6668C3.33333 12.1089 3.50893 12.5328 3.82149 12.8453C4.13405 13.1579 4.55797 13.3335 5 13.3335H15C15.442 13.3335 15.866 13.1579 16.1785 12.8453C16.4911 12.5328 16.6667 12.1089 16.6667 11.6668V3.3335M10 13.3335V16.6668M7.5 16.6668H12.5"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.66699 10.0003L9.16699 7.50033L10.8337 9.16699L13.3337 6.66699"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="font-normal">{@current_position + 1}/ {@total_slides}</span>
+          </div>
         </div>
       </div>
       <div

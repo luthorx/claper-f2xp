@@ -74,14 +74,15 @@ defmodule Claper.Tasks.Converter do
   def regenerate_thumbnails(%PresentationFile{length: nil}), do: {:error, :missing_length}
   def regenerate_thumbnails(%PresentationFile{length: 0}), do: {:error, :missing_length}
 
-  def regenerate_thumbnails(%PresentationFile{hash: hash, length: length}) do
+  def regenerate_thumbnails(%PresentationFile{hash: hash} = presentation_file) do
     case get_presentation_storage() do
       "local" ->
         path = Path.join([get_presentation_storage_dir(), "uploads", hash])
         generate_thumbnails(path)
 
       "s3" ->
-        regenerate_s3_thumbnails(hash, length)
+        # Deleted slides leave gaps in the file numbering: fetch the files still in use
+        regenerate_s3_thumbnails(hash, Claper.Presentations.slide_file_indexes(presentation_file))
 
       storage ->
         raise "Unrecognised presentations storage value #{storage}"
@@ -308,13 +309,13 @@ defmodule Claper.Tasks.Converter do
     end
   end
 
-  defp regenerate_s3_thumbnails(hash, length) do
+  defp regenerate_s3_thumbnails(hash, indexes) do
     path =
       Path.join(System.tmp_dir!(), "claper-thumbs-#{hash}-#{System.unique_integer([:positive])}")
 
     File.mkdir_p!(path)
 
-    with :ok <- download_s3_slides(path, hash, length),
+    with :ok <- download_s3_slides(path, hash, indexes),
          :ok <- generate_thumbnails(path),
          :ok <- upload_s3_thumbnails(path, hash) do
       File.rm_rf!(path)

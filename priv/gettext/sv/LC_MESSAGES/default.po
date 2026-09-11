@@ -3992,3 +3992,19 @@ msgstr "Tidsgräns"
 #, elixir-autogen, elixir-format
 msgid "Source code"
 msgstr "Källkod"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide"
+msgstr "Ta bort bild"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide %{number}? Any interactions on it will be moved to slide %{target}."
+msgstr "Ta bort bild %{number}? Eventuella interaktioner flyttas till bild %{target}."
+
+#, elixir-autogen, elixir-format
+msgid "Slide deleted"
+msgstr "Bilden har tagits bort"
+
+#, elixir-autogen, elixir-format
+msgid "Could not delete the slide"
+msgstr "Kunde inte ta bort bilden"

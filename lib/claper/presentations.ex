@@ -75,22 +75,33 @@ defmodule Claper.Presentations do
   def get_first_slide_url(%PresentationFile{length: nil}), do: nil
   def get_first_slide_url(%PresentationFile{length: 0}), do: nil
 
-  def get_first_slide_url(%PresentationFile{hash: hash, length: length})
+  def get_first_slide_url(%PresentationFile{hash: hash, length: length} = presentation)
       when is_binary(hash) and length > 0 do
     config = Application.get_env(:claper, :presentations)
+    # First slide in display order: it changes when slides are reordered or deleted
+    [index | _] = slide_file_indexes(presentation)
 
     case Keyword.fetch!(config, :storage) do
       "local" ->
-        "/uploads/#{hash}/1.jpg"
+        "/uploads/#{hash}/#{index}.jpg"
 
       "s3" ->
         base_url = Keyword.fetch!(config, :s3_public_url)
-        base_url <> "/presentations/#{hash}/1.jpg"
+        base_url <> "/presentations/#{hash}/#{index}.jpg"
 
       storage ->
         raise "Unrecognised presentations storage value #{storage}"
     end
   end
+
+  @doc """
+  Returns the 1-based slide file indexes of a presentation in display order.
+  """
+  def slide_file_indexes(%PresentationFile{length: length, slide_order: slide_order})
+      when is_integer(length),
+      do: slide_indexes(length, slide_order)
+
+  def slide_file_indexes(%PresentationFile{}), do: []
 
   @doc """
   Returns a list of JPG slide URLs for a given presentation `hash` and
@@ -324,11 +335,114 @@ defmodule Claper.Presentations do
     |> case do
       {:ok, {presentation_file, state, position_changed}} ->
         if position_changed, do: broadcast({:ok, state}, :state_updated)
+        broadcast_slides_updated(presentation_file)
         {:ok, presentation_file, state}
 
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  @doc """
+  Deletes the slide displayed at `position` (0-based display position).
+
+  As in `reorder_slides/3`, slide files are kept (a hash directory can be shared
+  by duplicated events): the slide is only dropped from `slide_order` and
+  `length`. Interactions of the deleted slide are kept, disabled, on the
+  previous slide (on the next one when the first slide is deleted); later
+  interactions and the presentation state position shift back by one. The only
+  slide of a presentation cannot be deleted.
+
+  Returns `{:ok, presentation_file, presentation_state}` or
+  `{:error, :invalid_position}`.
+  """
+  def delete_slide(%PresentationFile{} = presentation_file, position)
+      when is_integer(position) do
+    count = presentation_file.length || 0
+
+    if count < 2 or position < 0 or position >= count do
+      {:error, :invalid_position}
+    else
+      do_delete_slide(presentation_file, position)
+    end
+  end
+
+  defp do_delete_slide(presentation_file, position) do
+    new_order =
+      presentation_file.length
+      |> slide_indexes(presentation_file.slide_order)
+      |> List.delete_at(position)
+
+    Repo.transaction(fn ->
+      presentation_file =
+        presentation_file
+        |> PresentationFile.changeset(%{length: length(new_order), slide_order: new_order})
+        |> Repo.update!()
+
+      Enum.each(@interaction_schemas, fn schema ->
+        shift_interactions_after_deletion(schema, presentation_file.id, position)
+      end)
+
+      state = Repo.get_by(PresentationState, presentation_file_id: presentation_file.id)
+
+      new_position =
+        state && position_after_deletion(state.position, position, presentation_file.length)
+
+      position_changed = state && new_position != state.position
+
+      state =
+        if position_changed do
+          state
+          |> PresentationState.changeset(%{position: new_position})
+          |> Repo.update!()
+        else
+          state
+        end
+
+      {presentation_file, state, position_changed}
+    end)
+    |> case do
+      {:ok, {presentation_file, state, position_changed}} ->
+        if position_changed, do: broadcast({:ok, state}, :state_updated)
+        broadcast_slides_updated(presentation_file)
+        {:ok, presentation_file, state}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  # Interactions of the deleted slide move to the previous slide (they stay at 0
+  # when the first slide is deleted) and are disabled so a slide never ends up
+  # with two live interactions; the following ones shift back by one.
+  defp shift_interactions_after_deletion(schema, presentation_file_id, position) do
+    base = from(i in schema, where: i.presentation_file_id == ^presentation_file_id)
+
+    base
+    |> where([i], i.position == ^position)
+    |> Repo.update_all(set: [position: max(position - 1, 0)] ++ disabled_fields(schema))
+
+    base |> where([i], i.position > ^position) |> Repo.update_all(inc: [position: -1])
+  end
+
+  defp disabled_fields(Claper.Quizzes.Quiz), do: [enabled: false, started_at: nil]
+  defp disabled_fields(_schema), do: [enabled: false]
+
+  defp position_after_deletion(nil, _deleted, _count), do: nil
+
+  defp position_after_deletion(position, deleted, _count) when position > deleted,
+    do: position - 1
+
+  defp position_after_deletion(position, _deleted, count) when position >= count, do: count - 1
+  defp position_after_deletion(position, _deleted, _count), do: position
+
+  # Lets the presenter, attendee and other manager views reload the slide list
+  defp broadcast_slides_updated(presentation_file) do
+    Phoenix.PubSub.broadcast(
+      Claper.PubSub,
+      "presentation:#{presentation_file.id}",
+      {:slides_updated, presentation_file}
+    )
   end
 
   # Shifts the `position` column of every interaction so it follows its slide

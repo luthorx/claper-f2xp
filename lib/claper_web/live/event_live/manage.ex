@@ -354,6 +354,13 @@ defmodule ClaperWeb.EventLive.Manage do
     end
   end
 
+  # Slides deleted or reordered from another manager session
+  @impl true
+  def handle_info({:slides_updated, _presentation_file}, socket) do
+    socket = refresh_event(socket)
+    {:noreply, socket |> interactions_at_position(socket.assigns.state.position)}
+  end
+
   @impl true
   def handle_info(
         {:presentation_file_process_done, %{id: presentation_file_id}},
@@ -479,6 +486,37 @@ defmodule ClaperWeb.EventLive.Manage do
 
       {:error, _reason} ->
         {:noreply, socket |> put_flash(:error, gettext("Could not reorder slides"))}
+    end
+  end
+
+  @impl true
+  def handle_event(
+        "delete-slide",
+        %{"position" => position},
+        %{assigns: %{event: event, state: state}} = socket
+      ) do
+    with {position, ""} <- Integer.parse(to_string(position)),
+         {:ok, _presentation_file, new_state} <-
+           Presentations.delete_slide(event.presentation_file, position) do
+      if new_state && new_state.position != state.position do
+        Phoenix.PubSub.broadcast(
+          Claper.PubSub,
+          "event:#{event.uuid}",
+          {:page_changed, new_state.position}
+        )
+      end
+
+      socket = refresh_event(socket)
+      # Attendees were looking at the deleted slide: publish the interaction now on screen
+      broadcast = position == state.position
+
+      {:noreply,
+       socket
+       |> interactions_at_position(socket.assigns.state.position, broadcast)
+       |> put_flash(:info, gettext("Slide deleted"))}
+    else
+      _ ->
+        {:noreply, socket |> put_flash(:error, gettext("Could not delete the slide"))}
     end
   end
 

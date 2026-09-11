@@ -3960,3 +3960,19 @@ msgstr "Laika ierobežojums"
 #, elixir-autogen, elixir-format
 msgid "Source code"
 msgstr "Pirmkods"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide"
+msgstr "Dzēst slaidu"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide %{number}? Any interactions on it will be moved to slide %{target}."
+msgstr "Dzēst slaidu %{number}? Tā interakcijas tiks pārvietotas uz slaidu %{target}."
+
+#, elixir-autogen, elixir-format
+msgid "Slide deleted"
+msgstr "Slaids izdzēsts"
+
+#, elixir-autogen, elixir-format
+msgid "Could not delete the slide"
+msgstr "Neizdevās izdzēst slaidu"

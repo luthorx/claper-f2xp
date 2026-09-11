@@ -3956,3 +3956,19 @@ msgstr "Zeitlimit"
 #, elixir-autogen, elixir-format
 msgid "Source code"
 msgstr "Quellcode"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide"
+msgstr "Folie löschen"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide %{number}? Any interactions on it will be moved to slide %{target}."
+msgstr "Folie %{number} löschen? Eventuelle Interaktionen werden auf Folie %{target} verschoben."
+
+#, elixir-autogen, elixir-format
+msgid "Slide deleted"
+msgstr "Folie gelöscht"
+
+#, elixir-autogen, elixir-format
+msgid "Could not delete the slide"
+msgstr "Folie konnte nicht gelöscht werden"

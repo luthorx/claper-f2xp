@@ -3958,3 +3958,19 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Source code"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide %{number}? Any interactions on it will be moved to slide %{target}."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Slide deleted"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Could not delete the slide"
+msgstr ""

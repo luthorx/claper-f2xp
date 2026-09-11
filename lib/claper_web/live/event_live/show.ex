@@ -285,6 +285,11 @@ defmodule ClaperWeb.EventLive.Show do
   end
 
   @impl true
+  def handle_info({:slides_updated, _presentation_file}, socket) do
+    {:noreply, assign_current_slide(socket, socket.assigns.state.position)}
+  end
+
+  @impl true
   def handle_info(
         {:current_interaction, _interaction},
         socket

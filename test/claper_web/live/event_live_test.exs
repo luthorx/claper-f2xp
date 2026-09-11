@@ -547,6 +547,27 @@ defmodule ClaperWeb.EventLiveTest do
                Claper.Quizzes.list_quizzes_at_position(presentation_file.id, 0)
     end
 
+    test "deletes the current slide and keeps the interactions", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      poll_fixture(%{presentation_file_id: presentation_file.id, position: 1, title: "Kept poll"})
+      code = presentation_file.event.code
+      {:ok, attendee_live, _html} = live(conn, ~p"/e/#{code}")
+      {:ok, manage_live, _html} = live(conn, ~p"/e/#{code}/manage")
+
+      html =
+        manage_live
+        |> element(~s(button[phx-click="delete-slide"][phx-value-position="0"]))
+        |> render_click()
+
+      assert html =~ "Slide deleted"
+      assert html =~ "Kept poll"
+      assert Claper.Presentations.get_presentation_file!(presentation_file.id).length == 41
+      # The attendee view reloads its slides without crashing
+      assert render(attendee_live) =~ presentation_file.event.name
+    end
+
     test "prompts to regenerate missing thumbnails and starts regeneration", %{
       conn: conn,
       presentation_file: presentation_file

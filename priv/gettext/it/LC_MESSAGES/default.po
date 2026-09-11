@@ -3957,3 +3957,19 @@ msgstr "Tempo limite"
 #, elixir-autogen, elixir-format
 msgid "Source code"
 msgstr "Codice sorgente"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide"
+msgstr "Elimina diapositiva"
+
+#, elixir-autogen, elixir-format
+msgid "Delete slide %{number}? Any interactions on it will be moved to slide %{target}."
+msgstr "Eliminare la diapositiva %{number}? Le eventuali interazioni saranno spostate sulla diapositiva %{target}."
+
+#, elixir-autogen, elixir-format
+msgid "Slide deleted"
+msgstr "Diapositiva eliminata"
+
+#, elixir-autogen, elixir-format
+msgid "Could not delete the slide"
+msgstr "Impossibile eliminare la diapositiva"
