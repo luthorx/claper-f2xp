@@ -3976,3 +3976,11 @@ msgstr "Diapositive supprimée"
 #, elixir-autogen, elixir-format
 msgid "Could not delete the slide"
 msgstr "Impossible de supprimer la diapositive"
+
+#, elixir-autogen, elixir-format
+msgid "Messages activated"
+msgstr "Messages activés"
+
+#, elixir-autogen, elixir-format
+msgid "New message"
+msgstr "Nouveau message"

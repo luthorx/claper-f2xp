@@ -3976,3 +3976,11 @@ msgstr "Slaids izdzēsts"
 #, elixir-autogen, elixir-format
 msgid "Could not delete the slide"
 msgstr "Neizdevās izdzēst slaidu"
+
+#, elixir-autogen, elixir-format
+msgid "Messages activated"
+msgstr "Ziņojumi iespējoti"
+
+#, elixir-autogen, elixir-format
+msgid "New message"
+msgstr "Jauns ziņojums"

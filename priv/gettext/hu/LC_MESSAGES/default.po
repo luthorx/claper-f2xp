@@ -3972,3 +3972,11 @@ msgstr "Dia törölve"
 #, elixir-autogen, elixir-format
 msgid "Could not delete the slide"
 msgstr "A dia törlése nem sikerült"
+
+#, elixir-autogen, elixir-format
+msgid "Messages activated"
+msgstr "Üzenetek engedélyezve"
+
+#, elixir-autogen, elixir-format
+msgid "New message"
+msgstr "Új üzenet"

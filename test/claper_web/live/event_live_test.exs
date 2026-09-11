@@ -271,6 +271,25 @@ defmodule ClaperWeb.EventLiveTest do
       assert has_element?(show_live, ~s(#focus-slot[data-focus-fill="false"]))
     end
 
+    test "gives the fullscreen slide what it needs to announce messages", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      {:ok, show_live, _html} = live(conn, ~p"/e/#{presentation_file.event.code}")
+
+      assert has_element?(
+               show_live,
+               ~s(#focus-slot[data-chat-enabled="true"] #focus-chat-alert [data-focus-exit])
+             )
+
+      Claper.PostsFixtures.post_fixture(%{event: presentation_file.event, body: "A question"})
+
+      assert_push_event(show_live, "post-created", %{name: "Anonymous", body: "A question"})
+
+      send(show_live.pid, {:state_updated, set_chat_enabled(presentation_file, false)})
+      assert has_element?(show_live, ~s(#focus-slot[data-chat-enabled="false"]))
+    end
+
     test "a single-answer quiz question keeps only the latest choice", %{
       conn: conn,
       presentation_file: presentation_file

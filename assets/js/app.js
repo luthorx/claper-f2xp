@@ -572,6 +572,9 @@ Hooks.AttendeeFocus = {
   mounted() {
     this.focusKey = this.el.dataset.focusKey;
     this.collapseKey = this.el.dataset.collapseKey;
+    this.chatEnabled = this.el.dataset.chatEnabled === "true";
+    this.fallbackFullscreen = false;
+    this.unread = 0;
     this.onClick = (event) => {
       if (event.target.closest("[data-focus-collapse]")) {
         localStorage.setItem(this.collapseKey, "collapsed");
@@ -585,12 +588,20 @@ Hooks.AttendeeFocus = {
         return;
       }
 
+      if (event.target.closest("[data-focus-exit]")) {
+        this.exitFullscreen();
+        return;
+      }
+
+      if (event.target.closest("[data-alert-dismiss]")) {
+        this.hideChatAlert();
+        return;
+      }
+
       const fullscreenButton = event.target.closest("[data-focus-fullscreen]");
       if (fullscreenButton) {
-        if (document.fullscreenElement) {
-          document.exitFullscreen?.();
-        } else if (this.el.classList.contains("focus-fallback-fullscreen")) {
-          this.el.classList.remove("focus-fallback-fullscreen");
+        if (this.isFullscreen()) {
+          this.exitFullscreen();
         } else {
           this.enterFullscreen();
         }
@@ -598,10 +609,26 @@ Hooks.AttendeeFocus = {
       }
     };
     this.onKeyDown = (event) => {
-      if (event.key === "Escape") this.el.classList.remove("focus-fallback-fullscreen");
+      if (event.key === "Escape") this.setFallbackFullscreen(false);
+    };
+    this.onFullscreenChange = () => {
+      if (!this.isFullscreen()) this.hideChatAlert();
     };
     this.el.addEventListener("click", this.onClick);
     document.addEventListener("keydown", this.onKeyDown);
+    document.addEventListener("fullscreenchange", this.onFullscreenChange);
+    // In fullscreen the chat is out of sight: announce the messages that arrive
+    this.handleEvent("post-created", ({ name, body }) => {
+      const alert = this.chatAlert();
+      if (!alert || !this.isFullscreen()) return;
+
+      this.unread += 1;
+      const title =
+        this.unread === 1
+          ? alert.dataset.textNewOne
+          : `${this.unread} ${alert.dataset.textNewMany}`;
+      this.showChatAlert(title, `${name}: ${body}`);
+    });
     this.restoreCollapse();
   },
   updated() {
@@ -615,11 +642,24 @@ Hooks.AttendeeFocus = {
       }
       this.focusKey = nextKey;
     }
+
+    const chatEnabled = this.el.dataset.chatEnabled === "true";
+    const alert = this.chatAlert();
+    if (chatEnabled && !this.chatEnabled && alert && this.isFullscreen()) {
+      this.showChatAlert(alert.dataset.textOpen, alert.dataset.textOpenDetail);
+    } else if (!chatEnabled) {
+      this.hideChatAlert();
+    }
+    this.chatEnabled = chatEnabled;
+
+    // Patches reset the class attribute, which would leave the fallback fullscreen
+    this.el.classList.toggle("focus-fallback-fullscreen", this.fallbackFullscreen);
     this.restoreCollapse();
   },
   destroyed() {
     this.el.removeEventListener("click", this.onClick);
     document.removeEventListener("keydown", this.onKeyDown);
+    document.removeEventListener("fullscreenchange", this.onFullscreenChange);
   },
   restoreCollapse() {
     const interactionMode = this.el.dataset.interactionMode === "true";
@@ -628,15 +668,43 @@ Hooks.AttendeeFocus = {
     const collapsed = localStorage.getItem(this.collapseKey) === "collapsed";
     this.el.classList.toggle("focus-collapsed", collapsed && !interactionMode && !fill);
   },
+  isFullscreen() {
+    return document.fullscreenElement === this.el || this.fallbackFullscreen;
+  },
   enterFullscreen() {
     if (!this.el.requestFullscreen) {
-      this.el.classList.add("focus-fallback-fullscreen");
+      this.setFallbackFullscreen(true);
       return;
     }
 
     this.el.requestFullscreen().catch(() => {
-      this.el.classList.add("focus-fallback-fullscreen");
+      this.setFallbackFullscreen(true);
     });
+  },
+  exitFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    this.setFallbackFullscreen(false);
+  },
+  setFallbackFullscreen(value) {
+    this.fallbackFullscreen = value;
+    this.el.classList.toggle("focus-fallback-fullscreen", value);
+    if (!this.isFullscreen()) this.hideChatAlert();
+  },
+  chatAlert() {
+    return this.el.querySelector("[data-focus-chat-alert]");
+  },
+  showChatAlert(title, detail) {
+    const alert = this.chatAlert();
+    if (!alert) return;
+
+    alert.querySelector("[data-alert-title]").textContent = title;
+    alert.querySelector("[data-alert-detail]").textContent = detail;
+    if (alert.classList.contains("hidden")) navigator.vibrate?.(80);
+    alert.classList.replace("hidden", "flex");
+  },
+  hideChatAlert() {
+    this.unread = 0;
+    this.chatAlert()?.classList.replace("flex", "hidden");
   },
 };
 

@@ -157,6 +157,7 @@
         data-collapse-key={"focus-slot:#{@event.uuid}"}
         data-interaction-mode={to_string(interaction_mode?)}
         data-focus-fill={to_string(focus_fill?)}
+        data-chat-enabled={to_string(@state.chat_enabled)}
         class={[
           "relative z-10 min-h-0 overflow-hidden border-y border-white/10 bg-gray-950 transition-[height] duration-300",
           focus_fill? && "h-full",
@@ -169,6 +170,48 @@
           class="pointer-events-none absolute left-1/2 top-3 z-30 hidden -translate-x-1/2 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-lg"
         >
           {gettext("New interaction")}
+        </div>
+
+        <%!-- Shown by the AttendeeFocus hook in fullscreen, where the chat is out of sight --%>
+        <div id="focus-chat-alert" phx-update="ignore">
+          <div
+            data-focus-chat-alert
+            role="status"
+            aria-live="polite"
+            data-text-open={gettext("Messages activated")}
+            data-text-open-detail={gettext("Be the first to ask a question or share a thought.")}
+            data-text-new-one={gettext("New message")}
+            data-text-new-many={gettext("new messages")}
+            class="absolute inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 hidden items-center gap-2 rounded-2xl bg-primary-500 py-2 pl-4 pr-2 text-white shadow-2xl"
+          >
+            <div class="min-w-0 flex-1">
+              <p data-alert-title class="text-sm font-bold"></p>
+              <p data-alert-detail class="truncate text-xs text-white/80"></p>
+            </div>
+            <button
+              type="button"
+              data-focus-exit
+              class="min-h-9 shrink-0 rounded-full bg-white px-3 text-xs font-bold text-primary-700"
+            >
+              {gettext("Show messages")}
+            </button>
+            <button
+              type="button"
+              data-alert-dismiss
+              aria-label={gettext("Close")}
+              class="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/10"
+            >
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <%= case @current_interaction do %>

@@ -3974,3 +3974,11 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Could not delete the slide"
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Messages activated"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "New message"
+msgstr ""

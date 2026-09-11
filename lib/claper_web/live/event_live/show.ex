@@ -205,10 +205,14 @@ defmodule ClaperWeb.EventLive.Show do
 
   @impl true
   def handle_info({:post_created, post}, socket) do
+    # Announced by the hook when the slide is fullscreen and the chat is out of sight
+    author = if post.name in [nil, ""], do: gettext("Anonymous"), else: post.name
+
     {:noreply,
      socket
      |> stream_insert(:posts, post)
-     |> update(:post_count, fn count -> count + 1 end)}
+     |> update(:post_count, fn count -> count + 1 end)
+     |> push_event("post-created", %{name: author, body: post.body})}
   end
 
   @impl true

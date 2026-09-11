@@ -3972,3 +3972,11 @@ msgstr "Folie gelöscht"
 #, elixir-autogen, elixir-format
 msgid "Could not delete the slide"
 msgstr "Folie konnte nicht gelöscht werden"
+
+#, elixir-autogen, elixir-format
+msgid "Messages activated"
+msgstr "Nachrichten aktiviert"
+
+#, elixir-autogen, elixir-format
+msgid "New message"
+msgstr "Neue Nachricht"

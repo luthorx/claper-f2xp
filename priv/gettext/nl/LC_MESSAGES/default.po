@@ -3974,3 +3974,11 @@ msgstr "Dia verwijderd"
 #, elixir-autogen, elixir-format
 msgid "Could not delete the slide"
 msgstr "Kon dia niet verwijderen"
+
+#, elixir-autogen, elixir-format
+msgid "Messages activated"
+msgstr "Berichten geactiveerd"
+
+#, elixir-autogen, elixir-format
+msgid "New message"
+msgstr "Nieuw bericht"
