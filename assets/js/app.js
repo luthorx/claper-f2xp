@@ -276,6 +276,10 @@ Hooks.NicknamePicker = {
     }
 
     this.el.addEventListener("click", this.onClick);
+    // Name entered elsewhere in the room, e.g. to answer a quiz
+    this.handleEvent("nickname-saved", ({ nickname }) => {
+      localStorage.setItem(this.storageKey, nickname);
+    });
   },
   reconnected() {
     let currentNickname = this.currentNickname();

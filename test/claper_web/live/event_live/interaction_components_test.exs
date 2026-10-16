@@ -191,10 +191,10 @@ defmodule ClaperWeb.EventLive.InteractionComponentsTest do
 
     assert "flex-1" in classes(next_document, ~s(button[phx-click="next-question"]))
 
-    sign_in_document =
+    name_document =
       QuizComponent
       |> render_component(
-        id: "sign-in-quiz-component",
+        id: "named-quiz-component",
         quiz: %{quiz | allow_anonymous: false},
         current_user: nil,
         attendee_identifier: "attendee",
@@ -206,14 +206,28 @@ defmodule ClaperWeb.EventLive.InteractionComponentsTest do
       )
       |> Floki.parse_document!()
 
-    assert "text-[10px]" in classes(sign_in_document, "#quiz-sign-in-prompt")
+    assert Floki.find(name_document, ~s(#quiz-name-form input[name="name"])) != []
+    assert Floki.find(name_document, "#quiz-actions") == []
 
-    assert sign_in_document
-           |> Floki.find("#quiz-actions > div")
-           |> List.first()
-           |> elem(2)
-           |> Enum.filter(&match?({_, _, _}, &1))
-           |> Enum.map(&elem(&1, 0)) == ["a", "p"]
+    named_document =
+      QuizComponent
+      |> render_component(
+        id: "named-quiz-component",
+        quiz: %{quiz | allow_anonymous: false},
+        current_user: nil,
+        attendee_identifier: "attendee",
+        event: %{},
+        selected_quiz_question_opts: [option],
+        current_quiz_question_idx: 2,
+        current_quiz_responses: [],
+        quiz_score: {0, 1},
+        nickname: "Ada"
+      )
+      |> Floki.parse_document!()
+
+    assert Floki.find(named_document, "#quiz-name-form") == []
+    assert named_document |> Floki.find("#quiz-answering-as") |> Floki.text() =~ "Ada"
+    assert Floki.find(named_document, ~s(#quiz-actions button[phx-click="submit-quiz"])) != []
 
     submitted_quiz = %{quiz | show_results: true}
 

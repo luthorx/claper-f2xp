@@ -515,6 +515,64 @@ defmodule ClaperWeb.EventLiveTest do
     end
   end
 
+  describe "Quiz participants" do
+    setup [:register_and_log_in_user, :create_event]
+
+    test "attendees answer under their name and the facilitator follows their progress", %{
+      conn: conn,
+      presentation_file: presentation_file
+    } do
+      quiz =
+        quiz_fixture(%{
+          presentation_file: presentation_file,
+          position: 0,
+          enabled: true,
+          allow_anonymous: false
+        })
+
+      [correct, _wrong] = List.first(quiz.quiz_questions).quiz_question_opts
+      code = presentation_file.event.code
+
+      {:ok, manage_live, _html} = live(conn, ~p"/e/#{code}/manage")
+      assert has_element?(manage_live, "#settings-pane-interaction-options-quiz-participants")
+
+      {:ok, show_live, _html} = live(build_conn(), ~p"/e/#{code}")
+      assert has_element?(show_live, "#quiz-name-form")
+
+      # No answer is taken before the attendee gives a name
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(correct.id)})
+      assert Claper.Quizzes.list_quiz_participations(quiz.id) == []
+
+      show_live |> form("#quiz-name-form", %{name: "A"}) |> render_submit()
+      assert has_element?(show_live, "#quiz-name-error")
+
+      show_live |> form("#quiz-name-form", %{name: "Ada Lovelace"}) |> render_submit()
+      assert_push_event(show_live, "nickname-saved", %{nickname: "Ada Lovelace"})
+      assert has_element?(show_live, "#quiz-answering-as", "Ada Lovelace")
+
+      render_click(show_live, "select-quiz-question-opt", %{"opt" => to_string(correct.id)})
+
+      assert has_element?(
+               manage_live,
+               "#settings-pane-interaction-options-quiz-participants-in-progress",
+               "1"
+             )
+
+      assert render(manage_live) =~ "Ada Lovelace"
+      assert render(manage_live) =~ "1/1 answered"
+
+      render_click(show_live, "submit-quiz", %{})
+
+      assert has_element?(
+               manage_live,
+               "#settings-pane-interaction-options-quiz-participants-finished",
+               "1"
+             )
+
+      assert render(manage_live) =~ "1/1 correct"
+    end
+  end
+
   describe "Manage" do
     setup [:register_and_log_in_user, :create_event]
 

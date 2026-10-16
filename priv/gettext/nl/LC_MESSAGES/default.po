@@ -4034,3 +4034,43 @@ msgstr "Evenement overgedragen aan %{email}"
 #, elixir-autogen, elixir-format
 msgid "The event could not be transferred."
 msgstr "Het evenement kon niet worden overgedragen."
+
+#, elixir-autogen, elixir-format
+msgid "Answering as %{name}"
+msgstr "Je antwoordt als %{name}"
+
+#, elixir-autogen, elixir-format
+msgid "Enter your name to answer this quiz"
+msgstr "Vul je naam in om de quiz te beantwoorden"
+
+#, elixir-autogen, elixir-format
+msgid "Start the quiz"
+msgstr "Start de quiz"
+
+#, elixir-autogen, elixir-format
+msgid "Participants"
+msgstr "Deelnemers"
+
+#, elixir-autogen, elixir-format
+msgid "Finished answering"
+msgstr "Klaar"
+
+#, elixir-autogen, elixir-format
+msgid "Still answering"
+msgstr "Nog bezig"
+
+#, elixir-autogen, elixir-format
+msgid "No one has answered yet"
+msgstr "Nog niemand heeft geantwoord"
+
+#, elixir-autogen, elixir-format
+msgid "%{score}/%{total} correct"
+msgstr "%{score}/%{total} goed"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}/%{total} answered"
+msgstr "%{count}/%{total} beantwoord"
+
+#, elixir-autogen, elixir-format
+msgid "When unchecked, attendees without an account answer under their name, no sign-up needed."
+msgstr "Als dit uit staat, antwoorden deelnemers zonder account onder hun naam, zonder registratie."

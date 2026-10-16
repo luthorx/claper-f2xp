@@ -4032,3 +4032,43 @@ msgstr "Esemény átruházva: %{email}"
 #, elixir-autogen, elixir-format
 msgid "The event could not be transferred."
 msgstr "Az eseményt nem sikerült átruházni."
+
+#, elixir-autogen, elixir-format
+msgid "Answering as %{name}"
+msgstr "Válaszadó: %{name}"
+
+#, elixir-autogen, elixir-format
+msgid "Enter your name to answer this quiz"
+msgstr "Adja meg a nevét a kvíz kitöltéséhez"
+
+#, elixir-autogen, elixir-format
+msgid "Start the quiz"
+msgstr "Kvíz indítása"
+
+#, elixir-autogen, elixir-format
+msgid "Participants"
+msgstr "Résztvevők"
+
+#, elixir-autogen, elixir-format
+msgid "Finished answering"
+msgstr "Befejezték"
+
+#, elixir-autogen, elixir-format
+msgid "Still answering"
+msgstr "Még válaszolnak"
+
+#, elixir-autogen, elixir-format
+msgid "No one has answered yet"
+msgstr "Még senki sem válaszolt"
+
+#, elixir-autogen, elixir-format
+msgid "%{score}/%{total} correct"
+msgstr "%{score}/%{total} helyes"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}/%{total} answered"
+msgstr "%{count}/%{total} megválaszolva"
+
+#, elixir-autogen, elixir-format
+msgid "When unchecked, attendees without an account answer under their name, no sign-up needed."
+msgstr "Ha nincs bejelölve, a fiók nélküli résztvevők a nevükkel válaszolnak, regisztráció nélkül."

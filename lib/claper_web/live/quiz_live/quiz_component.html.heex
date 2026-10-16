@@ -220,7 +220,14 @@
         </p>
       </div>
 
-      <.checkbox form={f} key={:allow_anonymous} label={gettext("Allow anonymous submissions")} />
+      <div class="flex flex-col gap-1">
+        <.checkbox form={f} key={:allow_anonymous} label={gettext("Allow anonymous submissions")} />
+        <p class="text-xs text-gray-500">
+          {gettext(
+            "When unchecked, attendees without an account answer under their name, no sign-up needed."
+          )}
+        </p>
+      </div>
     </div>
 
     <div class="flex flex-col gap-2">

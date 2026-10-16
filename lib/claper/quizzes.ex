@@ -7,6 +7,7 @@ defmodule Claper.Quizzes do
   alias Claper.Quizzes.Quiz
   alias Claper.Quizzes.QuizQuestion
   alias Claper.Quizzes.QuizQuestionOpt
+  alias Claper.Quizzes.QuizParticipation
   alias Claper.Quizzes.QuizResponse
 
   # Answers sent right when the time runs out still count
@@ -319,8 +320,12 @@ defmodule Claper.Quizzes do
   #   end
   # end
 
-  def submit_quiz(%User{} = user, event_uuid, quiz_opts, quiz_id) do
-    quiz_opts = quiz_opts |> Enum.uniq_by(& &1.id) |> Enum.with_index()
+  def submit_quiz(participant, event_uuid, quiz_opts, quiz_id, name \\ nil)
+
+  def submit_quiz(%User{} = user, event_uuid, quiz_opts, quiz_id, _name) do
+    quiz_opts = quiz_opts |> Enum.uniq_by(& &1.id)
+    answered_count = answered_count(quiz_opts)
+    quiz_opts = Enum.with_index(quiz_opts)
 
     case Enum.reduce(quiz_opts, Ecto.Multi.new(), fn {opt, index}, multi ->
            unique_key = "#{opt.id}_#{user.id + index}"
@@ -343,14 +348,16 @@ defmodule Claper.Quizzes do
       {:ok, _} ->
         quiz = get_quiz!(quiz_id, [:quiz_questions, quiz_questions: :quiz_question_opts])
         Lti13.QuizScoreReporter.report_quiz_score(quiz, user.id)
+        complete_participation(user, event_uuid, quiz_id, answered_count, nil)
         broadcast({:ok, quiz, event_uuid}, :quiz_updated)
         {:ok, quiz}
     end
   end
 
-  def submit_quiz(attendee_identifier, event_uuid, quiz_opts, quiz_id)
+  def submit_quiz(attendee_identifier, event_uuid, quiz_opts, quiz_id, name)
       when is_binary(attendee_identifier) and is_list(quiz_opts) do
     quiz_opts = Enum.uniq_by(quiz_opts, & &1.id)
+    answered_count = answered_count(quiz_opts)
 
     case Enum.reduce(quiz_opts, Ecto.Multi.new(), fn opt, multi ->
            multi
@@ -371,9 +378,114 @@ defmodule Claper.Quizzes do
          |> Repo.transact() do
       {:ok, _} ->
         quiz = get_quiz!(quiz_id, [:quiz_questions, quiz_questions: :quiz_question_opts])
+        complete_participation(attendee_identifier, event_uuid, quiz_id, answered_count, name)
         broadcast({:ok, quiz, event_uuid}, :quiz_updated)
         {:ok, quiz}
     end
+  end
+
+  @doc """
+  Records how many questions of a quiz an attendee has answered so far, so the
+  facilitator can follow who is answering and how far they got. A participation
+  already submitted is left as it is.
+
+  The participant is a `%User{}` or an attendee identifier; `name` is the name
+  the attendee entered, ignored for users who are signed in.
+  """
+  def track_quiz_progress(participant, event_uuid, quiz_id, answered_count, name \\ nil) do
+    attrs = participation_attrs(participant, quiz_id, answered_count, name)
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    on_conflict =
+      from(p in QuizParticipation,
+        where: is_nil(p.completed_at),
+        update: [set: [answered_count: ^answered_count, name: ^attrs.name, updated_at: ^now]]
+      )
+
+    %QuizParticipation{}
+    |> QuizParticipation.changeset(attrs)
+    # A finished participation matches no row to update: that is not an error
+    |> Repo.insert(
+      on_conflict: on_conflict,
+      conflict_target: conflict_target(participant),
+      allow_stale: true
+    )
+
+    broadcast_progress(event_uuid, quiz_id)
+  end
+
+  @doc """
+  Lists who answered or is answering a quiz, in the order they started.
+  """
+  def list_quiz_participations(quiz_id) do
+    from(p in QuizParticipation,
+      where: p.quiz_id == ^quiz_id,
+      order_by: [asc: p.inserted_at, asc: p.id]
+    )
+    |> Repo.all()
+  end
+
+  defp complete_participation(participant, event_uuid, quiz_id, answered_count, name) do
+    {score, _total} = calculate_user_score(participant_id(participant), quiz_id)
+
+    attrs =
+      participant
+      |> participation_attrs(quiz_id, answered_count, name)
+      |> Map.merge(%{
+        score: score,
+        completed_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      })
+
+    %QuizParticipation{}
+    |> QuizParticipation.changeset(attrs)
+    |> Repo.insert!(
+      on_conflict: {:replace, [:name, :answered_count, :score, :completed_at, :updated_at]},
+      conflict_target: conflict_target(participant)
+    )
+
+    broadcast_progress(event_uuid, quiz_id)
+  end
+
+  defp answered_count(quiz_opts) do
+    quiz_opts |> Enum.map(& &1.quiz_question_id) |> Enum.uniq() |> length()
+  end
+
+  defp participation_attrs(%User{} = user, quiz_id, answered_count, _name) do
+    %{
+      quiz_id: quiz_id,
+      user_id: user.id,
+      name: User.display_name(user),
+      answered_count: answered_count
+    }
+  end
+
+  defp participation_attrs(attendee_identifier, quiz_id, answered_count, name)
+       when is_binary(attendee_identifier) do
+    name = if is_binary(name), do: String.trim(name), else: ""
+
+    %{
+      quiz_id: quiz_id,
+      attendee_identifier: attendee_identifier,
+      name: if(name == "", do: nil, else: name),
+      answered_count: answered_count
+    }
+  end
+
+  defp participant_id(%User{id: id}), do: id
+  defp participant_id(attendee_identifier), do: attendee_identifier
+
+  defp conflict_target(%User{}),
+    do: {:unsafe_fragment, "(quiz_id, user_id) WHERE user_id IS NOT NULL"}
+
+  defp conflict_target(_attendee_identifier),
+    do: {:unsafe_fragment, "(quiz_id, attendee_identifier) WHERE attendee_identifier IS NOT NULL"}
+
+  defp broadcast_progress(event_uuid, quiz_id) do
+    Phoenix.PubSub.broadcast(
+      Claper.PubSub,
+      "event:#{event_uuid}",
+      {:quiz_progress_updated, quiz_id}
+    )
   end
 
   @doc """

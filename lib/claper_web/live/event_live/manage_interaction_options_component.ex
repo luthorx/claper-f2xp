@@ -8,6 +8,7 @@ defmodule ClaperWeb.EventLive.ManageInteractionOptionsComponent do
       assigns
       |> assign_new(:show_shortcut, fn -> true end)
       |> assign_new(:id, fn -> "interaction-options" end)
+      |> assign_new(:quiz_participations, fn -> [] end)
 
     ~H"""
     <div class="flex flex-col gap-2 border border-gray-200 rounded-2xl p-2 bg-white shadow-lg">
@@ -220,6 +221,12 @@ defmodule ClaperWeb.EventLive.ManageInteractionOptionsComponent do
                   </:icon>
                 </.action_row>
               </div>
+
+              <.quiz_participants
+                id={"#{@id}-quiz-participants"}
+                participations={@quiz_participations}
+                question_count={length(@current_interaction.quiz_questions)}
+              />
             </div>
           <% nil -> %>
             <p class="text-gray-400 italic mt-1.5 text-sm">{gettext("No interaction enabled")}</p>
@@ -232,6 +239,93 @@ defmodule ClaperWeb.EventLive.ManageInteractionOptionsComponent do
     </div>
     """
   end
+
+  attr :id, :string, required: true
+  attr :participations, :list, required: true
+  attr :question_count, :integer, required: true
+
+  # Only the facilitator sees who answered and how far each attendee got
+  defp quiz_participants(assigns) do
+    {finished, in_progress} = Enum.split_with(assigns.participations, & &1.completed_at)
+
+    assigns =
+      assigns
+      |> assign(:finished_count, length(finished))
+      |> assign(:in_progress_count, length(in_progress))
+
+    ~H"""
+    <div id={@id} class="rounded-2xl border border-gray-200 bg-white p-3">
+      <p class="text-xs font-semibold text-gray-700">{gettext("Participants")}</p>
+      <div class="mt-2 grid grid-cols-2 gap-2">
+        <div class="rounded-xl bg-supporting-green-50 px-3 py-2">
+          <p id={"#{@id}-finished"} class="text-lg font-bold text-supporting-green-700">
+            {@finished_count}
+          </p>
+          <p class="text-xs text-gray-600">{gettext("Finished answering")}</p>
+        </div>
+        <div class="rounded-xl bg-gray-100 px-3 py-2">
+          <p id={"#{@id}-in-progress"} class="text-lg font-bold text-secondary-500">
+            {@in_progress_count}
+          </p>
+          <p class="text-xs text-gray-600">{gettext("Still answering")}</p>
+        </div>
+      </div>
+      <p :if={@participations == []} class="mt-3 text-xs italic text-gray-400">
+        {gettext("No one has answered yet")}
+      </p>
+      <ul :if={@participations != []} class="mt-3 max-h-72 space-y-2 overflow-y-auto">
+        <li
+          :for={participation <- @participations}
+          id={"#{@id}-#{participation.id}"}
+          class="flex items-center gap-2 text-xs"
+        >
+          <span class={[
+            "min-w-0 flex-1 truncate",
+            if(participation.name, do: "font-medium text-gray-700", else: "italic text-gray-400")
+          ]}>
+            {participation.name || gettext("Anonymous")}
+          </span>
+          <span class="h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-gray-100">
+            <span
+              class={[
+                "block h-full rounded-full",
+                if(participation.completed_at,
+                  do: "bg-supporting-green-500",
+                  else: "bg-primary-500"
+                )
+              ]}
+              style={"width: #{progress_percent(participation, @question_count)}%"}
+            >
+            </span>
+          </span>
+          <span
+            :if={participation.completed_at}
+            class="w-20 shrink-0 text-right font-semibold text-supporting-green-700"
+          >
+            {gettext("%{score}/%{total} correct",
+              score: participation.score || 0,
+              total: @question_count
+            )}
+          </span>
+          <span :if={!participation.completed_at} class="w-20 shrink-0 text-right text-gray-500">
+            {gettext("%{count}/%{total} answered",
+              count: participation.answered_count,
+              total: @question_count
+            )}
+          </span>
+        </li>
+      </ul>
+    </div>
+    """
+  end
+
+  defp progress_percent(%{completed_at: completed_at}, _total) when not is_nil(completed_at),
+    do: 100
+
+  defp progress_percent(_participation, 0), do: 0
+
+  defp progress_percent(participation, total),
+    do: min(round(participation.answered_count * 100 / total), 100)
 
   attr :label, :string, required: true
   attr :checked, :boolean, required: true

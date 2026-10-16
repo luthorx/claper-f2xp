@@ -418,6 +418,14 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   @impl true
+  def handle_info(
+        {:quiz_progress_updated, quiz_id},
+        %{assigns: %{current_interaction: %Quizzes.Quiz{id: quiz_id}}} = socket
+      ) do
+    {:noreply, assign_quiz_participations(socket)}
+  end
+
+  @impl true
   def handle_info({:interactions_imported, _interactions}, socket) do
     {:noreply, socket |> interactions_at_position(socket.assigns.state.position)}
   end
@@ -1372,9 +1380,22 @@ defmodule ClaperWeb.EventLive.Manage do
     with {:ok, interactions} <-
            Claper.Interactions.get_interactions_at_position(event, position, broadcast) do
       active = interactions |> Enum.find(& &1.enabled)
-      socket |> assign(:interactions, interactions) |> assign(:current_interaction, active)
+
+      socket
+      |> assign(:interactions, interactions)
+      |> assign(:current_interaction, active)
+      |> assign_quiz_participations()
     end
   end
+
+  # Who is answering the active quiz and how far they got
+  defp assign_quiz_participations(
+         %{assigns: %{current_interaction: %Quizzes.Quiz{id: quiz_id}}} = socket
+       ) do
+    assign(socket, :quiz_participations, Quizzes.list_quiz_participations(quiz_id))
+  end
+
+  defp assign_quiz_participations(socket), do: assign(socket, :quiz_participations, [])
 
   defp list_pinned_posts(_socket, event_id) do
     Claper.Posts.list_pinned_posts(event_id, [:event, :reactions])

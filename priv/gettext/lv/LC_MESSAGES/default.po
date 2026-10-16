@@ -4036,3 +4036,43 @@ msgstr "Pasākums nodots %{email}"
 #, elixir-autogen, elixir-format
 msgid "The event could not be transferred."
 msgstr "Pasākumu neizdevās nodot."
+
+#, elixir-autogen, elixir-format
+msgid "Answering as %{name}"
+msgstr "Jūs atbildat kā %{name}"
+
+#, elixir-autogen, elixir-format
+msgid "Enter your name to answer this quiz"
+msgstr "Ievadiet savu vārdu, lai atbildētu uz viktorīnu"
+
+#, elixir-autogen, elixir-format
+msgid "Start the quiz"
+msgstr "Sākt viktorīnu"
+
+#, elixir-autogen, elixir-format
+msgid "Participants"
+msgstr "Dalībnieki"
+
+#, elixir-autogen, elixir-format
+msgid "Finished answering"
+msgstr "Pabeiguši"
+
+#, elixir-autogen, elixir-format
+msgid "Still answering"
+msgstr "Vēl atbild"
+
+#, elixir-autogen, elixir-format
+msgid "No one has answered yet"
+msgstr "Neviens vēl nav atbildējis"
+
+#, elixir-autogen, elixir-format
+msgid "%{score}/%{total} correct"
+msgstr "%{score}/%{total} pareizi"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}/%{total} answered"
+msgstr "%{count}/%{total} atbildēti"
+
+#, elixir-autogen, elixir-format
+msgid "When unchecked, attendees without an account answer under their name, no sign-up needed."
+msgstr "Ja nav atzīmēts, dalībnieki bez konta atbild ar savu vārdu, bez reģistrācijas."

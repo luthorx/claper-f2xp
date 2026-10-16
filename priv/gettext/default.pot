@@ -4034,3 +4034,43 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "The event could not be transferred."
 msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Answering as %{name}"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Enter your name to answer this quiz"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Start the quiz"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Participants"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Finished answering"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "Still answering"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "No one has answered yet"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "%{score}/%{total} correct"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "%{count}/%{total} answered"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+msgid "When unchecked, attendees without an account answer under their name, no sign-up needed."
+msgstr ""

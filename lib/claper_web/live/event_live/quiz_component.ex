@@ -7,6 +7,8 @@ defmodule ClaperWeb.EventLive.QuizComponent do
       assigns
       |> assign_new(:focus_mode, fn -> false end)
       |> assign_new(:quiz_time_up, fn -> false end)
+      |> assign_new(:nickname, fn -> "" end)
+      |> assign_new(:quiz_name_error, fn -> nil end)
       |> assign(:deadline, Claper.Quizzes.deadline(assigns.quiz))
       |> assign(:is_submitted, length(assigns.current_quiz_responses) > 0)
       |> assign(
@@ -24,6 +26,21 @@ defmodule ClaperWeb.EventLive.QuizComponent do
 
     # Time ran out before any answer was sent
     assigns = assign(assigns, :locked, assigns.quiz_time_up and not assigns.is_submitted)
+
+    # Attendees without an account answer under their name, unless the quiz is anonymous
+    identified_by_name = is_nil(assigns.current_user) and not assigns.quiz.allow_anonymous
+
+    assigns =
+      assigns
+      |> assign(
+        :needs_name,
+        identified_by_name and assigns.nickname in [nil, ""] and not assigns.is_submitted and
+          not assigns.locked
+      )
+      |> assign(
+        :answering_as,
+        if(identified_by_name and assigns.nickname not in [nil, ""], do: assigns.nickname)
+      )
 
     ~H"""
     <div class="font-display">
@@ -97,7 +114,7 @@ defmodule ClaperWeb.EventLive.QuizComponent do
               class="rounded-full bg-white/10 px-2 py-0.5 text-sm font-bold text-white"
             />
           </div>
-          <%= if is_nil(@current_question) or @locked do %>
+          <%= if is_nil(@current_question) or @locked or @needs_name do %>
             <p class="mb-2 text-lg font-bold leading-snug text-white">{@quiz.title}</p>
           <% else %>
             <p class="mb-1 text-lg font-bold leading-snug text-white">
@@ -105,6 +122,13 @@ defmodule ClaperWeb.EventLive.QuizComponent do
             </p>
             <p class={["text-sm text-gray-400", if(@is_submitted, do: "mb-4", else: "mb-1")]}>
               {@current_quiz_question_idx + 1}/{length(@quiz.quiz_questions)}
+            </p>
+            <p
+              :if={@answering_as && !@is_submitted}
+              id="quiz-answering-as"
+              class="mb-1 text-xs text-gray-500"
+            >
+              {gettext("Answering as %{name}", name: @answering_as)}
             </p>
             <p :if={!@is_submitted} id="quiz-selection-hint" class="mb-4 text-sm text-gray-400">
               {if @current_question.allow_multiple,
@@ -119,7 +143,41 @@ defmodule ClaperWeb.EventLive.QuizComponent do
             {gettext("The time to answer this quiz is over.")}
           </p>
         </div>
-        <div :if={!@locked}>
+        <form
+          :if={@needs_name}
+          id="quiz-name-form"
+          phx-submit="set-quiz-name"
+          class="mt-2 flex flex-col gap-3"
+        >
+          <label for="quiz-name" class="text-sm text-gray-300">
+            {gettext("Enter your name to answer this quiz")}
+          </label>
+          <input
+            id="quiz-name"
+            name="name"
+            type="text"
+            value={@nickname}
+            minlength="2"
+            maxlength="20"
+            required
+            autocomplete="name"
+            placeholder={gettext("Enter your name")}
+            class="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-primary-400 focus:outline-none"
+          />
+          <p :if={@quiz_name_error} id="quiz-name-error" class="text-xs text-supporting-red-300">
+            {@quiz_name_error}
+          </p>
+          <button type="submit" class="btn-gradient w-full rounded-lg px-3 py-2 text-sm font-bold">
+            {gettext("Start the quiz")}
+          </button>
+          <p class="text-center text-xs text-gray-400">
+            {gettext("Already have an account?")}
+            <.link href={~p"/users/log_in"} target="_blank" class="underline hover:text-white">
+              {gettext("Sign in")}
+            </.link>
+          </p>
+        </form>
+        <div :if={!@locked and !@needs_name}>
           <div class="flex max-h-[500px] flex-col gap-2 overflow-y-auto">
             <%= if @current_question do %>
               <%= for {opt, _idx} <- Enum.with_index(@current_question.quiz_question_opts) do %>
@@ -265,35 +323,17 @@ defmodule ClaperWeb.EventLive.QuizComponent do
                 {gettext("Next")}
               </button>
             <% else %>
-              <%= if is_nil(@current_user) && !@quiz.allow_anonymous do %>
-                <div class="flex min-w-0 flex-1 flex-col gap-1">
-                  {link(
-                    gettext("Sign in"),
-                    target: "_blank",
-                    to: ~p"/users/log_in",
-                    class:
-                      "btn-gradient inline w-full rounded-lg px-3 py-2 text-center text-sm font-bold"
-                  )}
-                  <p
-                    id="quiz-sign-in-prompt"
-                    class="text-center text-[10px] leading-tight text-gray-400"
-                  >
-                    {gettext("Please sign in to submit your answers")}
-                  </p>
-                </div>
-              <% else %>
-                <button
-                  phx-click="submit-quiz"
-                  class={[
-                    "flex-1 rounded-lg px-3 py-2 text-sm font-bold",
-                    @has_selection && "btn-gradient",
-                    !@has_selection && "cursor-not-allowed bg-gray-700 text-gray-400"
-                  ]}
-                  disabled={not @has_selection}
-                >
-                  {gettext("Submit")}
-                </button>
-              <% end %>
+              <button
+                phx-click="submit-quiz"
+                class={[
+                  "flex-1 rounded-lg px-3 py-2 text-sm font-bold",
+                  @has_selection && "btn-gradient",
+                  !@has_selection && "cursor-not-allowed bg-gray-700 text-gray-400"
+                ]}
+                disabled={not @has_selection}
+              >
+                {gettext("Submit")}
+              </button>
             <% end %>
           </div>
 

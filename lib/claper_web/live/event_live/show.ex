@@ -102,6 +102,7 @@ defmodule ClaperWeb.EventLive.Show do
       |> assign(:selected_quiz_question_opts, [])
       |> assign(:current_quiz_question_idx, 0)
       |> assign(:quiz_time_up, false)
+      |> assign(:quiz_name_error, nil)
       |> assign(:event, event)
       |> assign(:state, event.presentation_file.presentation_state)
       |> assign(:slide_urls, slide_urls)
@@ -758,6 +759,13 @@ defmodule ClaperWeb.EventLive.Show do
     {:noreply, socket}
   end
 
+  def handle_event("select-quiz-question-opt", _params, %{assigns: assigns} = socket)
+      when not is_map(assigns.current_user) and
+             not assigns.current_interaction.allow_anonymous and
+             assigns.nickname in [nil, ""] do
+    {:noreply, socket}
+  end
+
   def handle_event(
         "select-quiz-question-opt",
         %{"opt" => opt},
@@ -793,15 +801,40 @@ defmodule ClaperWeb.EventLive.Show do
           ]
       end
 
-    {:noreply, assign(socket, :selected_quiz_question_opts, selected)}
+    {:noreply,
+     socket
+     |> maybe_track_quiz_progress(selected)
+     |> assign(:selected_quiz_question_opts, selected)}
+  end
+
+  @impl true
+  def handle_event("set-quiz-name", %{"name" => name}, socket) do
+    name = String.trim(name)
+    changeset = Posts.Post.nickname_changeset(%Posts.Post{}, %{"name" => name})
+
+    if changeset.valid? do
+      {:noreply,
+       socket
+       |> assign(:nickname, name)
+       |> assign(:quiz_name_error, nil)
+       |> push_event("nickname-saved", %{nickname: name})}
+    else
+      {:noreply,
+       assign(socket, :quiz_name_error, gettext("Nickname must be between 2 and 20 characters"))}
+    end
   end
 
   @impl true
   def handle_event("submit-quiz", _params, socket) do
-    if Quizzes.accepting_responses?(socket.assigns.current_interaction) do
-      {:noreply, submit_quiz_answers(socket)}
-    else
-      {:noreply, assign(socket, :quiz_time_up, true)}
+    cond do
+      quiz_needs_name?(socket.assigns) ->
+        {:noreply, socket}
+
+      Quizzes.accepting_responses?(socket.assigns.current_interaction) ->
+        {:noreply, submit_quiz_answers(socket)}
+
+      true ->
+        {:noreply, assign(socket, :quiz_time_up, true)}
     end
   end
 
@@ -1048,7 +1081,7 @@ defmodule ClaperWeb.EventLive.Show do
   # When time runs out, the answers already chosen are sent as they are
   defp submit_selected_answers(%{assigns: assigns} = socket) do
     if assigns.current_quiz_responses == [] and assigns.selected_quiz_question_opts != [] and
-         (is_map(assigns.current_user) or assigns.current_interaction.allow_anonymous) do
+         not quiz_needs_name?(assigns) do
       submit_quiz_answers(socket)
     else
       socket
@@ -1056,21 +1089,53 @@ defmodule ClaperWeb.EventLive.Show do
   end
 
   defp submit_quiz_answers(%{assigns: assigns} = socket) do
-    participant =
-      if is_map(assigns.current_user), do: assigns.current_user, else: assigns.attendee_identifier
-
     {:ok, quiz} =
       Quizzes.submit_quiz(
-        participant,
+        quiz_participant(assigns),
         assigns.event.uuid,
         assigns.selected_quiz_question_opts,
-        assigns.current_interaction.id
+        assigns.current_interaction.id,
+        assigns.nickname
       )
 
     socket
     |> load_current_interaction(quiz, true)
     |> assign(:selected_quiz_question_opts, [])
     |> assign(:current_quiz_question_idx, length(quiz.quiz_questions))
+  end
+
+  defp quiz_participant(%{current_user: current_user}) when is_map(current_user),
+    do: current_user
+
+  defp quiz_participant(%{attendee_identifier: attendee_identifier}), do: attendee_identifier
+
+  # Unless the quiz allows anonymous answers, attendees without an account give their name
+  defp quiz_needs_name?(assigns) do
+    not is_map(assigns.current_user) and not assigns.current_interaction.allow_anonymous and
+      assigns.nickname in [nil, ""]
+  end
+
+  # Lets the facilitator follow how many questions each attendee has answered
+  defp maybe_track_quiz_progress(%{assigns: assigns} = socket, selected) do
+    answered = selected |> Enum.map(& &1.quiz_question_id) |> Enum.uniq() |> length()
+
+    previously_answered =
+      assigns.selected_quiz_question_opts
+      |> Enum.map(& &1.quiz_question_id)
+      |> Enum.uniq()
+      |> length()
+
+    if answered != previously_answered and assigns.current_quiz_responses == [] do
+      Quizzes.track_quiz_progress(
+        quiz_participant(assigns),
+        assigns.event.uuid,
+        assigns.current_interaction.id,
+        answered,
+        assigns.nickname
+      )
+    end
+
+    socket
   end
 
   defp maybe_reset_selected_poll_opt(socket, true) do

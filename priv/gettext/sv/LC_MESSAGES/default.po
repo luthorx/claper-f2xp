@@ -4068,3 +4068,43 @@ msgstr "Evenemanget har överförts till %{email}"
 #, elixir-autogen, elixir-format
 msgid "The event could not be transferred."
 msgstr "Evenemanget kunde inte överföras."
+
+#, elixir-autogen, elixir-format
+msgid "Answering as %{name}"
+msgstr "Du svarar som %{name}"
+
+#, elixir-autogen, elixir-format
+msgid "Enter your name to answer this quiz"
+msgstr "Ange ditt namn för att svara på quizet"
+
+#, elixir-autogen, elixir-format
+msgid "Start the quiz"
+msgstr "Starta quizet"
+
+#, elixir-autogen, elixir-format
+msgid "Participants"
+msgstr "Deltagare"
+
+#, elixir-autogen, elixir-format
+msgid "Finished answering"
+msgstr "Klara"
+
+#, elixir-autogen, elixir-format
+msgid "Still answering"
+msgstr "Svarar fortfarande"
+
+#, elixir-autogen, elixir-format
+msgid "No one has answered yet"
+msgstr "Ingen har svarat än"
+
+#, elixir-autogen, elixir-format
+msgid "%{score}/%{total} correct"
+msgstr "%{score}/%{total} rätt"
+
+#, elixir-autogen, elixir-format
+msgid "%{count}/%{total} answered"
+msgstr "%{count}/%{total} besvarade"
+
+#, elixir-autogen, elixir-format
+msgid "When unchecked, attendees without an account answer under their name, no sign-up needed."
+msgstr "Om rutan inte är markerad svarar deltagare utan konto med sitt namn, utan registrering."

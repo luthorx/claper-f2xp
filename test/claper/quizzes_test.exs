@@ -146,6 +146,45 @@ defmodule Claper.QuizzesTest do
       assert length(responses) == 1
     end
 
+    test "track_quiz_progress/5 records how far an attendee got under their name" do
+      quiz = quiz_fixture()
+      event_uuid = Ecto.UUID.generate()
+
+      Quizzes.track_quiz_progress("attendee-1", event_uuid, quiz.id, 1, "  Ada ")
+      Quizzes.track_quiz_progress("attendee-1", event_uuid, quiz.id, 2, "Ada Lovelace")
+      Quizzes.track_quiz_progress("attendee-2", event_uuid, quiz.id, 1, "")
+
+      assert [
+               %{name: "Ada Lovelace", answered_count: 2, completed_at: nil},
+               %{name: nil, answered_count: 1}
+             ] = Quizzes.list_quiz_participations(quiz.id)
+    end
+
+    test "submit_quiz/5 completes the participation with the score" do
+      quiz = quiz_fixture()
+      user = user_fixture(%{first_name: "Grace", last_name: "Hopper"})
+      event_uuid = Ecto.UUID.generate()
+      Phoenix.PubSub.subscribe(Claper.PubSub, "event:#{event_uuid}")
+      [correct, wrong] = List.first(quiz.quiz_questions).quiz_question_opts
+
+      Quizzes.track_quiz_progress("attendee-1", event_uuid, quiz.id, 1, "Ada")
+      assert_received {:quiz_progress_updated, quiz_id} when quiz_id == quiz.id
+
+      {:ok, _} = Quizzes.submit_quiz("attendee-1", event_uuid, [correct], quiz.id, "Ada")
+      {:ok, _} = Quizzes.submit_quiz(user, event_uuid, [wrong], quiz.id)
+
+      assert [
+               %{name: "Ada", answered_count: 1, score: 1, completed_at: %DateTime{}},
+               %{name: "Grace Hopper", answered_count: 1, score: 0, completed_at: %DateTime{}}
+             ] = Quizzes.list_quiz_participations(quiz.id)
+
+      # A late progress update does not reopen a finished participation
+      Quizzes.track_quiz_progress("attendee-1", event_uuid, quiz.id, 0, "Ada")
+
+      assert %{answered_count: 1, completed_at: %DateTime{}} =
+               quiz.id |> Quizzes.list_quiz_participations() |> List.first()
+    end
+
     test "calculate_user_score/2 correctly calculates score" do
       quiz = quiz_fixture()
       user = user_fixture()
